@@ -2,3 +2,6 @@
 *.dll
 .env*
 .DS_Store
+
+# ignore directories
+bin

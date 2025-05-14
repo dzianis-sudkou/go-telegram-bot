@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/bot/keyboards"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -18,13 +19,24 @@ func Callbacks(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 	var msg tgbotapi.EditMessageTextConfig
 
-	switch update.CallbackData() {
+	callbackData := strings.Split(update.CallbackData(), `_`)
+
+	switch callbackData[0] {
 	case "request":
 		text := "<b>1️⃣ - (PAID)</b> Skip the queue and get your image as soon as possible.\n"
 		text += "<b>2️⃣ - (FREE)</b> Your request will be added to the queue and will be processed.\n\n"
 		text += "Choose a type of your request:"
 		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardRequestTypes())
 	case "download":
+		if len(callbackData) == 1 {
+			text := "<b>Download</b>\n\nTo Download my pictures in the best quality and without watermark, "
+			text += "send me a number of publication.\n\nHow to knew a number you need:\n"
+			text += "<b>1.</b> Open publication in my group - @gokuryo_art\n"
+			text += "<b>2.</b> Copy the number from the description."
+			msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardMainMenu())
+		} else {
+			log.Println("This is the next step")
+		}
 	case "socials":
 		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, "<b>🔗 Socials 🔗</b>", keyboards.KeyboardSocials())
 	case "support":

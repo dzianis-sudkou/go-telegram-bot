@@ -1,6 +1,8 @@
 package keyboards
 
-import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+import (
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+)
 
 func KeyboardStart() tgbotapi.InlineKeyboardMarkup {
 	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
@@ -36,7 +38,7 @@ func KeyboardSocials() tgbotapi.InlineKeyboardMarkup {
 func KeyboardSupport() tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonURL("🔵 <b>PayPal</b> 🔵", "https://www.paypal.com/donate/?hosted_button_id=R5C8W4VRS9Y8C"),
+			tgbotapi.NewInlineKeyboardButtonURL("🔵 PayPal 🔵", "https://www.paypal.com/donate/?hosted_button_id=R5C8W4VRS9Y8C"),
 			tgbotapi.NewInlineKeyboardButtonURL("🟠 Boosty 🟠", "https://boosty.to/moskvinssss/donate"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
@@ -57,6 +59,15 @@ func KeyboardRequestTypes() tgbotapi.InlineKeyboardMarkup {
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("↩️", "start"),
+		),
+	)
+	return keyboard
+}
+
+func KeyboardMainMenu() tgbotapi.InlineKeyboardMarkup {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🏠 Main Menu 🏠", "start"),
 		),
 	)
 	return keyboard

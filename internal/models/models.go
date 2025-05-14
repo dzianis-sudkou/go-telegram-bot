@@ -11,6 +11,7 @@ type User struct {
 	FreeRequestCount     uint
 	GeneratedImagesCount uint
 	RegistrationDate     time.Time
+	State                string
 	Authorized           bool
 	FreeRequests         []FreeRequest
 	GeneratedImages      []GeneratedImage

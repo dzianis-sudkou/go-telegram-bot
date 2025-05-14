@@ -9,8 +9,8 @@ import (
 func Init(bot *tgbotapi.BotAPI) {
 	// Drop updates
 	updateConfig := tgbotapi.NewUpdate(0)
-
 	updateConfig.Timeout = 30
+	updateConfig.AllowedUpdates = []string{"callback_query", "message"}
 
 	// Start polling telegram
 	updates := bot.GetUpdatesChan(updateConfig)
@@ -22,14 +22,14 @@ func Init(bot *tgbotapi.BotAPI) {
 
 	// Go through each update update received from Telegram servers
 	for update := range updates {
-		if update.CallbackQuery != nil {
+		if update.Message != nil {
+			if update.Message.IsCommand() {
+				Commands(bot, update)
+			} else {
+				Messages(bot, update)
+			}
+		} else if update.CallbackQuery != nil {
 			Callbacks(bot, update)
-		} else if update.Message.IsCommand() {
-			Commands(bot, update)
-		} else if update.Message != nil {
-			Messages(bot, update)
-		} else {
-			continue
 		}
 	}
 }

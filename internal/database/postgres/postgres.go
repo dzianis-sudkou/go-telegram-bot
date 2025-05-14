@@ -9,12 +9,18 @@ import (
 	"gorm.io/gorm"
 )
 
+func Init() *gorm.DB {
+	// Connect to database
+	db := Connect()
+
+	// Create Tables
+	CreateTables(db)
+	return db
+}
+
 // Connect to database
 func Connect() *gorm.DB {
 	dsn := config.Config("DSN")
-	if dsn == "" {
-		log.Fatalf("Environment Variable %s not found", "DSN")
-	}
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Open db connection error: %v", err)

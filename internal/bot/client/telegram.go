@@ -11,7 +11,6 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
-	bot.Debug = true
-
+	bot.Debug = config.BotDebug
 	handlers.Init(bot)
 }

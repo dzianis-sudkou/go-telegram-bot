@@ -6,6 +6,7 @@ import (
 )
 
 const Logger bool = true
+const BotDebug bool = false
 
 func Config(key string) string {
 	val := os.Getenv(key)

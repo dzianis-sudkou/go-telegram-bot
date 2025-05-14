@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/bot/keyboards"
+	"github.com/dzianis-sudkou/go-telegram-bot/internal/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -18,6 +19,7 @@ func Commands(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 }
 
 func cmdStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+	services.AddNewUser(&update)
 	text := fmt.Sprintf("<b>Hello %s</b>\n", update.SentFrom().FirstName+update.SentFrom().LastName)
 	text += "This is the bot <b>Creative Dream AI</b>.\nHere you can:\n"
 	text += "<b>1.</b> Make a request for your own character.\n"

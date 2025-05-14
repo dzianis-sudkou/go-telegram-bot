@@ -2,8 +2,8 @@ package postgres
 
 import (
 	"log"
-	"os"
 
+	"github.com/dzianis-sudkou/go-telegram-bot/internal/config"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -11,7 +11,7 @@ import (
 
 // Connect to database
 func Connect() *gorm.DB {
-	dsn := os.Getenv("DSN")
+	dsn := config.Config("DSN")
 	if dsn == "" {
 		log.Fatalf("Environment Variable %s not found", "DSN")
 	}

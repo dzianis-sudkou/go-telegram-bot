@@ -33,6 +33,10 @@ func AddNewUser(update *tgbotapi.Update) {
 	}
 }
 
+func SetUserState(update *tgbotapi.Update, state string) {
+
+}
+
 func IsSubscribed(bot *tgbotapi.BotAPI, tgID int64) bool {
 
 	// Take the channel id from env

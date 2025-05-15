@@ -1,7 +1,9 @@
 package postgres
 
 import (
+	"encoding/json"
 	"log"
+	"os"
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/config"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/models"
@@ -15,6 +17,7 @@ func Init() *gorm.DB {
 
 	// Create Tables
 	CreateTables(db)
+
 	return db
 }
 
@@ -35,8 +38,33 @@ func CreateTables(db *gorm.DB) {
 		&models.Image{},
 		&models.FreeRequest{},
 		&models.GeneratedImage{},
+		&models.EnLocale{},
+		&models.RuLocale{},
 	)
 	if err != nil {
 		log.Fatalf("Table creation error: %v", err)
+	}
+}
+
+func GenerateLocales(db *gorm.DB) {
+
+	// Generate table with Locales [ru, en]
+	jsonData, err := os.ReadFile("internal/repositories/locales/en.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var localesMap map[string]string
+	err = json.Unmarshal(jsonData, &localesMap)
+	if err != nil {
+		log.Printf("JSON unmarshal error: %v", err)
+	}
+
+	for key, value := range localesMap {
+		locale := models.EnLocale{
+			State: key,
+			Text:  value,
+		}
+		db.Create(&locale)
 	}
 }

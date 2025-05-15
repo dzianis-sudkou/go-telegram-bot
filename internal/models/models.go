@@ -49,3 +49,15 @@ type GeneratedImage struct {
 	Done     bool
 	UserID   uint
 }
+
+type RuLocale struct {
+	ID    uint   `gorm:"primaryKey"`
+	State string `gorm:"uniqueIndex"`
+	Text  string
+}
+
+type EnLocale struct {
+	ID    uint   `gorm:"primaryKey"`
+	State string `gorm:"uniqueIndex"`
+	Text  string
+}

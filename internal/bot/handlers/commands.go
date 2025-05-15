@@ -26,15 +26,14 @@ func cmdStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 		// Add new user to the database if not presented
 		services.AddNewUser(&update)
+		// services.SetUserState(&update, "start")
 
-		text := fmt.Sprintf("<b>Hello %s</b>\n", update.SentFrom().FirstName+update.SentFrom().LastName)
-		text += "This is the bot <b>Creative Dream AI</b>.\nHere you can:\n"
-		text += "<b>1.</b> Make a request for your own character.\n"
-		text += "<b>2.</b> Download my pictures without watermark in the best quality."
+		// Getting the message reply from the locale database
+		text := fmt.Sprintf(services.GetTextLocale(update.Message.From.LanguageCode, "start"), update.SentFrom().FirstName+update.SentFrom().LastName)
 		msg = tgbotapi.NewMessage(update.Message.Chat.ID, text)
 		msg.ReplyMarkup = keyboards.KeyboardStart()
 	} else {
-		text := "To use this bot, you should be subscribed to my channel!"
+		text := fmt.Sprint(services.GetTextLocale(update.Message.From.LanguageCode, "not_subscribed"))
 		msg = tgbotapi.NewMessage(update.Message.Chat.ID, text)
 		msg.ReplyMarkup = keyboards.KeyboardSubscribe()
 	}

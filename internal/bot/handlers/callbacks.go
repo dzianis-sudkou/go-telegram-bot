@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/bot/keyboards"
+	"github.com/dzianis-sudkou/go-telegram-bot/internal/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -47,7 +48,19 @@ func Callbacks(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		text += "<b>1.</b> Make a request for your own character.\n"
 		text += "<b>2.</b> Download my pictures without watermark in the best quality."
 		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardStart())
+	case "startVerify":
+		if services.IsSubscribed(bot, update.CallbackQuery.From.ID) {
+			text := fmt.Sprintf("<b>Hello %s</b>\n", update.SentFrom().FirstName+update.SentFrom().LastName)
+			text += "This is the bot Creative Dream AI.\nHere you can:\n"
+			text += "<b>1.</b> Make a request for your own character.\n"
+			text += "<b>2.</b> Download my pictures without watermark in the best quality."
+			msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardStart())
+		} else {
+			text := "To use this bot, you should be subscribed to my channel!"
+			msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardSubscribe())
+		}
 	}
+
 	msg.ParseMode = "HTML"
 	if _, err := bot.Send(msg); err != nil {
 		log.Printf("Callback Error: %v", err)

@@ -72,3 +72,15 @@ func KeyboardMainMenu() tgbotapi.InlineKeyboardMarkup {
 	)
 	return keyboard
 }
+
+func KeyboardSubscribe() tgbotapi.InlineKeyboardMarkup {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonURL("Creative Dream AI", "t.me/@gokuryo_art"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("✅", "startVerify"),
+		),
+	)
+	return keyboard
+}

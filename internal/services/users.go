@@ -2,8 +2,11 @@ package services
 
 import (
 	"log"
+	"slices"
+	"strconv"
 	"time"
 
+	"github.com/dzianis-sudkou/go-telegram-bot/internal/config"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/models"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/repositories"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -28,4 +31,24 @@ func AddNewUser(update *tgbotapi.Update) {
 			log.Printf("User creation error: %v", err)
 		}
 	}
+}
+
+func IsSubscribed(bot *tgbotapi.BotAPI, tgID int64) bool {
+
+	// Take the channel id from env
+	channelId, _ := strconv.ParseInt(config.Config("CHANNEL_ID"), 10, 64)
+	memberConfig := tgbotapi.GetChatMemberConfig{
+		ChatConfigWithUser: tgbotapi.ChatConfigWithUser{
+			ChatID: channelId,
+			UserID: tgID,
+		},
+	}
+
+	member, err := bot.GetChatMember(memberConfig)
+	if err != nil {
+		log.Printf("Member is not presented: %v", err)
+		return false
+	}
+	roles := []string{"creator", "administrator", "member"}
+	return slices.Contains(roles, member.Status)
 }

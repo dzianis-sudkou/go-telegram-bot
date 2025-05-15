@@ -23,34 +23,27 @@ func Callbacks(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	callbackData := strings.Split(update.CallbackData(), `_`)
 
 	switch callbackData[0] {
-
-	case "request":
-		msg = requestCallback(bot, &update, &callbackData)
-
-	case "download":
-		text := "<b>Download</b>\n\nTo Download my pictures in the best quality and without watermark, "
-		text += "send me a number of publication.\n\nHow to knew a number you need:\n"
-		text += "<b>1.</b> Open publication in my group - @gokuryo_art\n"
-		text += "<b>2.</b> Copy the number from the description."
-		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardMainMenu())
-
-	case "socials":
-		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, "<b>🔗 Socials 🔗</b>", keyboards.KeyboardSocials())
-
-	case "support":
-		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, "<b>💵 Support Channel 💵</b>", keyboards.KeyboardSupport())
-
 	case "start":
 		if services.IsSubscribed(bot, update.CallbackQuery.From.ID) {
-			text := fmt.Sprintf("<b>Hello %s</b>\n", update.SentFrom().FirstName+update.SentFrom().LastName)
-			text += "This is the bot Creative Dream AI.\nHere you can:\n"
-			text += "<b>1.</b> Make a request for your own character.\n"
-			text += "<b>2.</b> Download my pictures without watermark in the best quality."
-			msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardStart())
+			text := fmt.Sprintf(services.GetTextLocale(update.CallbackQuery.From.LanguageCode, update.CallbackData()), update.CallbackQuery.From.FirstName+update.CallbackQuery.From.LastName)
+			msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardStart(update.CallbackQuery.From.LanguageCode))
 		} else {
 			text := "To use this bot, you should be subscribed to my channel!"
 			msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardSubscribe())
 		}
+
+	case "request":
+		msg = callbackRequest(&update, &callbackData)
+
+	case "download":
+		msg = callbackDownload(&update, &callbackData)
+
+	case "socials":
+		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, services.GetTextLocale(update.CallbackQuery.From.LanguageCode, "socials"), keyboards.KeyboardSocials())
+
+	case "support":
+		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, services.GetTextLocale(update.CallbackQuery.From.LanguageCode, "support"), keyboards.KeyboardSupport())
+
 	}
 
 	msg.ParseMode = "HTML"
@@ -59,10 +52,13 @@ func Callbacks(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	}
 }
 
-func requestCallback(bot *tgbotapi.BotAPI, update *tgbotapi.Update, callbackData *[]string) tgbotapi.EditMessageTextConfig {
+func callbackRequest(update *tgbotapi.Update, callbackData *[]string) tgbotapi.EditMessageTextConfig {
 	var msg tgbotapi.EditMessageTextConfig
-	services.SetUserState(update, (*callbackData)[0]+(*callbackData)[1])
+
+	services.SetUserState(update, (*callbackData)[0]+"_"+(*callbackData)[1])
+
 	text := services.GetTextLocale(update.CallbackQuery.From.LanguageCode, (*callbackData)[0]+"_"+(*callbackData)[1])
+
 	switch (*callbackData)[1] {
 
 	// Menu for choosing the type of request
@@ -75,7 +71,28 @@ func requestCallback(bot *tgbotapi.BotAPI, update *tgbotapi.Update, callbackData
 
 	// Free Request type
 	case "2":
+		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardFreeRequestStart())
 
+	// Request a character form
+	case "make":
+		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardMainMenu())
+
+	}
+	return msg
+}
+
+func callbackDownload(update *tgbotapi.Update, callbackData *[]string) tgbotapi.EditMessageTextConfig {
+	var msg tgbotapi.EditMessageTextConfig
+
+	services.SetUserState(update, (*callbackData)[0]+"_"+(*callbackData)[1])
+
+	text := services.GetTextLocale(update.CallbackQuery.From.LanguageCode, (*callbackData)[0]+"_"+(*callbackData)[1])
+
+	switch (*callbackData)[1] {
+
+	// Menu for the download
+	case "0":
+		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardMainMenu())
 	}
 	return msg
 }

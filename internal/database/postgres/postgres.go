@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -49,22 +50,36 @@ func CreateTables(db *gorm.DB) {
 func GenerateLocales(db *gorm.DB) {
 
 	// Generate table with Locales [ru, en]
-	jsonData, err := os.ReadFile("internal/repositories/locales/en.json")
-	if err != nil {
-		panic(err)
-	}
+	var languages []string = []string{"en", "ru"}
 
-	var localesMap map[string]string
-	err = json.Unmarshal(jsonData, &localesMap)
-	if err != nil {
-		log.Printf("JSON unmarshal error: %v", err)
-	}
+	for _, language := range languages {
+		filePath := fmt.Sprintf("internal/repositories/locales/%s.json", language)
 
-	for key, value := range localesMap {
-		locale := models.EnLocale{
-			State: key,
-			Text:  value,
+		jsonData, err := os.ReadFile(filePath)
+		if err != nil {
+			panic(err)
 		}
-		db.Create(&locale)
+		var localesMap map[string]string
+		err = json.Unmarshal(jsonData, &localesMap)
+		if err != nil {
+			log.Printf("JSON unmarshal error: %v", err)
+		}
+		for key, value := range localesMap {
+			switch language {
+			case "en":
+				locale := models.EnLocale{
+					State: key,
+					Text:  value,
+				}
+				db.Create(&locale)
+			case "ru":
+				locale := models.RuLocale{
+					State: key,
+					Text:  value,
+				}
+				db.Create(&locale)
+			}
+
+		}
 	}
 }

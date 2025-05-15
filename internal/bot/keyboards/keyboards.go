@@ -1,18 +1,19 @@
 package keyboards
 
 import (
+	"github.com/dzianis-sudkou/go-telegram-bot/internal/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func KeyboardStart() tgbotapi.InlineKeyboardMarkup {
+func KeyboardStart(locale string) tgbotapi.InlineKeyboardMarkup {
 	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("✍️ Request ✍️", "request_0"),
-			tgbotapi.NewInlineKeyboardButtonData("🖼️ Download 🖼️", "download_0"),
+			tgbotapi.NewInlineKeyboardButtonData(services.GetTextLocale(locale, "requestButton"), "request_0"),
+			tgbotapi.NewInlineKeyboardButtonData(services.GetTextLocale(locale, "downloadButton"), "download_0"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🔗 Socials 🔗", "socials"),
-			tgbotapi.NewInlineKeyboardButtonData("💵 Support channel 💵", "support"),
+			tgbotapi.NewInlineKeyboardButtonData(services.GetTextLocale(locale, "socialsButton"), "socials"),
+			tgbotapi.NewInlineKeyboardButtonData(services.GetTextLocale(locale, "supportButton"), "support"),
 		),
 	)
 	return keyboard
@@ -90,6 +91,18 @@ func KeyboardPaidPictureRequest() tgbotapi.InlineKeyboardMarkup {
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonURL("PayPal", "https://www.paypal.com/donate/?hosted_button_id=R5C8W4VRS9Y8C"),
 			tgbotapi.NewInlineKeyboardButtonURL("➡️", "t.me/@gokuryo"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("↩️", "request_0"),
+		),
+	)
+	return keyboard
+}
+
+func KeyboardFreeRequestStart() tgbotapi.InlineKeyboardMarkup {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("➡️", "request_make"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("↩️", "request_0"),

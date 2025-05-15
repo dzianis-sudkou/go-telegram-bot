@@ -31,7 +31,7 @@ func cmdStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		// Getting the message reply from the locale database
 		text := fmt.Sprintf(services.GetTextLocale(update.Message.From.LanguageCode, "start"), update.SentFrom().FirstName+update.SentFrom().LastName)
 		msg = tgbotapi.NewMessage(update.Message.Chat.ID, text)
-		msg.ReplyMarkup = keyboards.KeyboardStart()
+		msg.ReplyMarkup = keyboards.KeyboardStart(update.Message.From.LanguageCode)
 	} else {
 		text := fmt.Sprint(services.GetTextLocale(update.Message.From.LanguageCode, "not_subscribed"))
 		msg = tgbotapi.NewMessage(update.Message.Chat.ID, text)

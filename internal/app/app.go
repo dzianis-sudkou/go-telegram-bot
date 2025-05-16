@@ -24,9 +24,6 @@ func Run() {
 	// Start the DB connection
 	repositories.DB = postgres.Init()
 
-	// Generate the table with locales
-	postgres.GenerateLocales(repositories.DB)
-
 	// Start the Bot
 	client.Init()
 }

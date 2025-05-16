@@ -26,10 +26,20 @@ func Callbacks(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	case "start":
 		if services.IsSubscribed(bot, update.CallbackQuery.From.ID) {
 			text := fmt.Sprintf(services.GetTextLocale(update.CallbackQuery.From.LanguageCode, update.CallbackData()), update.CallbackQuery.From.FirstName+update.CallbackQuery.From.LastName)
-			msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardStart(update.CallbackQuery.From.LanguageCode))
+			msg = tgbotapi.NewEditMessageTextAndMarkup(
+				update.CallbackQuery.Message.Chat.ID,
+				update.CallbackQuery.Message.MessageID,
+				text,
+				keyboards.KeyboardStart(update.CallbackQuery.From.LanguageCode),
+			)
 		} else {
 			text := "To use this bot, you should be subscribed to my channel!"
-			msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardSubscribe())
+			msg = tgbotapi.NewEditMessageTextAndMarkup(
+				update.CallbackQuery.Message.Chat.ID,
+				update.CallbackQuery.Message.MessageID,
+				text,
+				keyboards.KeyboardSubscribe(),
+			)
 		}
 
 	case "request":
@@ -39,7 +49,12 @@ func Callbacks(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		msg = callbackDownload(&update, &callbackData)
 
 	case "socials":
-		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, services.GetTextLocale(update.CallbackQuery.From.LanguageCode, "socials"), keyboards.KeyboardSocials())
+		msg = tgbotapi.NewEditMessageTextAndMarkup(
+			update.CallbackQuery.Message.Chat.ID,
+			update.CallbackQuery.Message.MessageID,
+			services.GetTextLocale(update.CallbackQuery.From.LanguageCode, "socials"),
+			keyboards.KeyboardSocials(),
+		)
 
 	case "support":
 		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, services.GetTextLocale(update.CallbackQuery.From.LanguageCode, "support"), keyboards.KeyboardSupport())
@@ -63,19 +78,39 @@ func callbackRequest(update *tgbotapi.Update, callbackData *[]string) tgbotapi.E
 
 	// Menu for choosing the type of request
 	case "0":
-		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardRequestTypes())
+		msg = tgbotapi.NewEditMessageTextAndMarkup(
+			update.CallbackQuery.Message.Chat.ID,
+			update.CallbackQuery.Message.MessageID,
+			text,
+			keyboards.KeyboardRequestTypes(),
+		)
 
 	// Paid Request type
 	case "1":
-		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardPaidPictureRequest())
+		msg = tgbotapi.NewEditMessageTextAndMarkup(
+			update.CallbackQuery.Message.Chat.ID,
+			update.CallbackQuery.Message.MessageID,
+			text,
+			keyboards.KeyboardPaidPictureRequest(),
+		)
 
 	// Free Request type
 	case "2":
-		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardFreeRequestStart())
+		msg = tgbotapi.NewEditMessageTextAndMarkup(
+			update.CallbackQuery.Message.Chat.ID,
+			update.CallbackQuery.Message.MessageID,
+			text,
+			keyboards.KeyboardFreeRequestStart(),
+		)
 
 	// Request a character form
 	case "make":
-		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardMainMenu())
+		msg = tgbotapi.NewEditMessageTextAndMarkup(
+			update.CallbackQuery.Message.Chat.ID,
+			update.CallbackQuery.Message.MessageID,
+			text,
+			keyboards.KeyboardMainMenu(),
+		)
 
 	}
 	return msg

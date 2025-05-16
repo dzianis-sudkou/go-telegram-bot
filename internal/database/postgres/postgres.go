@@ -19,6 +19,9 @@ func Init() *gorm.DB {
 	// Create Tables
 	CreateTables(db)
 
+	// Generate the table with locales
+	GenerateLocales(db)
+
 	return db
 }
 

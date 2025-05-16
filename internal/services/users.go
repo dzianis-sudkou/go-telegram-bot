@@ -14,7 +14,7 @@ import (
 
 func AddNewUser(update *tgbotapi.Update) {
 	var newUser = models.User{
-		TgId:                 uint64(update.Message.From.ID),
+		TgId:                 update.Message.From.ID,
 		FullName:             update.Message.From.FirstName + update.Message.From.LastName,
 		MsgCount:             0,
 		FreeRequestCount:     0,
@@ -33,8 +33,25 @@ func AddNewUser(update *tgbotapi.Update) {
 	}
 }
 
-func SetUserState(update *tgbotapi.Update, state string) {
+func GetUserState(update *tgbotapi.Update) string {
+	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	if err != nil {
+		log.Printf("User not found: %v", err)
+		return ""
+	}
+	return user.State
+}
 
+func SetUserState(update *tgbotapi.Update, state string) {
+	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	if err != nil {
+		log.Printf("User not found: %v", err)
+	}
+	user.State = state
+	err = repositories.UpdateUser(&user)
+	if err != nil {
+		log.Printf("Update user state: %v", err)
+	}
 }
 
 func IsSubscribed(bot *tgbotapi.BotAPI, tgID int64) bool {
@@ -55,4 +72,12 @@ func IsSubscribed(bot *tgbotapi.BotAPI, tgID int64) bool {
 	}
 	roles := []string{"creator", "administrator", "member"}
 	return slices.Contains(roles, member.Status)
+}
+
+func IsAdmin(update *tgbotapi.Update) bool {
+	adminList := []string{
+		config.Config("TG_GOKURYO_ID"),
+		config.Config("TG_DZIANIS_ID"),
+	}
+	return slices.Contains(adminList, strconv.Itoa(int(update.SentFrom().ID)))
 }

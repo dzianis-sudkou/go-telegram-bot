@@ -4,8 +4,8 @@ import "time"
 
 // 1. Table user in database
 type User struct {
-	ID                   uint
-	TgId                 uint64
+	ID                   uint `gorm:"primaryKey"`
+	TgId                 int64
 	FullName             string
 	MsgCount             uint
 	FreeRequestCount     uint
@@ -19,14 +19,14 @@ type User struct {
 
 // 2. Table posts in database
 type Post struct {
-	ID          uint
+	ID          uint `gorm:"primaryKey"`
 	Description string
 	Images      []Image
 }
 
 // 3 Table images in database
 type Image struct {
-	ID      uint
+	ID      uint `gorm:"primaryKey"`
 	Name    string
 	ImageID string
 	PostID  uint
@@ -34,16 +34,16 @@ type Image struct {
 
 // 4. Table free_requests in database
 type FreeRequest struct {
-	ID           uint
+	ID           uint `gorm:"primaryKey"`
 	Text         string
-	CreationData time.Time
+	CreationDate time.Time
 	Language     string
 	UserID       uint
 }
 
 // 5. Table generated_images in database
 type GeneratedImage struct {
-	ID       uint
+	ID       uint `gorm:"primaryKey"`
 	TaskUUID string
 	ImageURL string
 	Done     bool

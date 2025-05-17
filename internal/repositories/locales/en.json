@@ -3,6 +3,7 @@
   "not_subscribed": "To use this bot, you should be subscribed to my channel!",
 
   "download_0": "<b>Download</b>\n\nTo Download my pictures in the best quality and without watermark, send me a number of publication.\n\nHow to knew a number you need:\n<b>1.</b> Open publication in my group - @gokuryo_art\n<b>2.</b> Copy the number from the description.",
+  "download_1": "Send me another post number, or press the number below",
 
   "requestButton": "✍️ Request ✍️",
   "downloadButton": "🖼️ Download 🖼️",
@@ -16,5 +17,7 @@
   "request_0": "<b>1️⃣ - (PAID)</b> Skip the queue and get your image as soon as possible.\n<b>2️⃣ - (FREE)</b> Your request will be added to the queue and will be processed.\n\nChoose a type of your request:",
   "request_1": "Your request will be added to the queue and will be processed as soon as possible.\nThe waiting time may vary depending on the complexity of the request.\n\nPaid request price list:\n\nRegular pics (like on @gokuryo_art channel):\n• 5$ for 1 picture.\n• 15$ for a 4-picture pack.\n<b>! ! ! Regular pictures</b> will be posted on the @gokuryo_art channel\n\nNSFW / Hentai pics (you can access the nsfw chat room after the purchase)\n• 7$ for 1 picture\n• 20$ for a 4 picture pack.\n<b>! ! ! NSFW pictures</b> can be posted to the NSFW chat or not as you wish.\n\nPlease use <b>PayPal</b> to pay for your request, and then proceed with the arrow.\n\nPlease write this in the payment description: %s",
   "request_2": "<b>Your request</b> will be added to the queue and will be processed.\nThe waiting time may vary depending on the current load and the complexity of the request.",
-  "request_make": "Let's create a <b>Request.</b>\n\nWrite here what would you like to see\n\nExample: <i>Gojo Satoru in the wedding</i>"
+  "request_make": "Let's create a <b>Request.</b>\n\nWrite here what would you like to see\n\nExample: <i>Gojo Satoru in the wedding</i>",
+  "request_made": "Your request:\n\n<blockquote>%s</blockquote>\n\nHas been successfully created!",
+  "request_wrong": "You can't send me request now. Please follow insructions."
 }

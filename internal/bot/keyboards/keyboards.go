@@ -65,10 +65,10 @@ func KeyboardRequestTypes() tgbotapi.InlineKeyboardMarkup {
 	return keyboard
 }
 
-func KeyboardMainMenu() tgbotapi.InlineKeyboardMarkup {
+func KeyboardMainMenu(locale string) tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🏠 Main Menu 🏠", "start"),
+			tgbotapi.NewInlineKeyboardButtonData(services.GetTextLocale(locale, "mainMenuButton"), "start"),
 		),
 	)
 	return keyboard

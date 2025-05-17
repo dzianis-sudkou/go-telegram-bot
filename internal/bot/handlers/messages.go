@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/dzianis-sudkou/go-telegram-bot/internal/bot/keyboards"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -20,10 +21,16 @@ func Messages(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		msg = msgNewPost(&update, &stateSlice)
 	case "download":
 		msg = msgNewDownload(bot, &update)
-	default:
-
+		msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
+	case "request":
+		if stateSlice[1] != "make" {
+			msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "request_wrong"))
+		} else {
+			msg = msgNewRequest(&update)
+		}
+		msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
 	}
-
+	msg.ParseMode = "HTML"
 	if _, err := bot.Send(msg); err != nil {
 		log.Printf("Message sending error: %v", err)
 	}
@@ -46,10 +53,16 @@ func msgNewDownload(bot *tgbotapi.BotAPI, update *tgbotapi.Update) (msg tgbotapi
 	for _, image := range images {
 		mediaGroupDocs = append(mediaGroupDocs, tgbotapi.NewInputMediaDocument(tgbotapi.FileID(image.ImageID)))
 	}
-	fmt.Printf("%v", mediaGroupDocs)
 	if _, err := bot.SendMediaGroup(tgbotapi.MediaGroupConfig{ChatID: update.FromChat().ID, Media: mediaGroupDocs}); err != nil {
 		log.Printf("Send media group: %v", err)
 	}
-	msg = tgbotapi.NewMessage(update.FromChat().ID, "To proceed, press the button below.")
+	msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "download_1"))
+	return
+}
+
+func msgNewRequest(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
+	services.AddNewRequest(update)
+	text := fmt.Sprintf(services.GetTextLocale(update.SentFrom().LanguageCode, "request_made"), update.Message.Text)
+	msg = tgbotapi.NewMessage(update.FromChat().ID, text)
 	return
 }

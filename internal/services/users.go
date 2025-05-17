@@ -81,3 +81,11 @@ func IsAdmin(update *tgbotapi.Update) bool {
 	}
 	return slices.Contains(adminList, strconv.Itoa(int(update.SentFrom().ID)))
 }
+
+func GetUser(update *tgbotapi.Update) (user models.User) {
+	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	if err != nil {
+		log.Printf("User not found: %v", err)
+	}
+	return
+}

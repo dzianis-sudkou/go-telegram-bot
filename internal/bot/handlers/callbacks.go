@@ -103,13 +103,13 @@ func callbackRequest(update *tgbotapi.Update, callbackData *[]string) tgbotapi.E
 			keyboards.KeyboardFreeRequestStart(),
 		)
 
-	// Request a character form
+	// Request form
 	case "make":
 		msg = tgbotapi.NewEditMessageTextAndMarkup(
 			update.CallbackQuery.Message.Chat.ID,
 			update.CallbackQuery.Message.MessageID,
 			text,
-			keyboards.KeyboardMainMenu(),
+			keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode),
 		)
 
 	}
@@ -127,7 +127,7 @@ func callbackDownload(update *tgbotapi.Update, callbackData *[]string) tgbotapi.
 
 	// Menu for the download
 	case "0":
-		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardMainMenu())
+		msg = tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode))
 	}
 	return msg
 }

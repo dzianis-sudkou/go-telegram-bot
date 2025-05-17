@@ -3,9 +3,9 @@ package repositories
 import "github.com/dzianis-sudkou/go-telegram-bot/internal/models"
 
 // CREATE
-func CreateImage(image *models.Image) error {
-	result := DB.Create(image)
-	return result.Error
+func CreateImage(image *models.Image) (err error) {
+	err = DB.Create(image).Error
+	return
 }
 
 // READ

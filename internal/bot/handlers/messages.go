@@ -14,32 +14,45 @@ func Messages(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	var msg tgbotapi.MessageConfig
 
 	state := services.GetUserState(&update)
-	stateSlice := strings.Split(state, "_")
 
 	if update.Message.SuccessfulPayment != nil {
-		log.Println(update.Message.SuccessfulPayment.TelegramPaymentChargeID)
+		log.Println(update.Message.SuccessfulPayment.TelegramPaymentChargeID, update.Message.SuccessfulPayment.TotalAmount)
+		msg = msgSuccessfulPayment(&update)
+	} else {
+		stateSlice := strings.Split(state, "_")
+
+		switch stateSlice[0] {
+
+		// Admin has sent images for a new post
+		case "newPost":
+			msg = msgNewPost(&update, &stateSlice)
+
+		// User asked to download images from the post
+		case "download":
+			msg = msgNewDownload(bot, &update)
+			msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
+
+		// User has made a request
+		case "request":
+			if stateSlice[1] != "make" {
+				msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "request_wrong"))
+			} else {
+				msg = msgNewRequest(&update)
+			}
+			msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
+
+		case "generate":
+			msg = msgGenerate(&update, &stateSlice)
+		}
 	}
 
-	switch stateSlice[0] {
-	case "newPost":
-		msg = msgNewPost(&update, &stateSlice)
-	case "download":
-		msg = msgNewDownload(bot, &update)
-		msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
-	case "request":
-		if stateSlice[1] != "make" {
-			msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "request_wrong"))
-		} else {
-			msg = msgNewRequest(&update)
-		}
+	if msg.Text == "" {
+		msg = tgbotapi.NewMessage(update.FromChat().ID, "I'm sorry, your request is wrong")
 		msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
 	}
-
-	if msg.Text != "" {
-		msg.ParseMode = "HTML"
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Message sending error: %v", err)
-		}
+	msg.ParseMode = "HTML"
+	if _, err := bot.Send(msg); err != nil {
+		log.Printf("Message sending error: %v", err)
 	}
 }
 
@@ -71,5 +84,29 @@ func msgNewRequest(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 	services.AddNewRequest(update)
 	text := fmt.Sprintf(services.GetTextLocale(update.SentFrom().LanguageCode, "request_made"), update.Message.Text)
 	msg = tgbotapi.NewMessage(update.FromChat().ID, text)
+	return
+}
+
+func msgSuccessfulPayment(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
+	services.SetUserState(update, "successfulPayment")
+	services.ChangeBalance(update.Message.SuccessfulPayment.TotalAmount, update)
+	msg = tgbotapi.NewMessage(update.FromChat().ID, "Your payment was successful, thank you!")
+	msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
+	return
+}
+
+func msgGenerate(update *tgbotapi.Update, stateSlice *[]string) (msg tgbotapi.MessageConfig) {
+	switch (*stateSlice)[1] {
+	case "menu":
+	case "1":
+		msg = tgbotapi.NewMessage(update.FromChat().ID, "Your image will be ready soon.")
+		msg.ReplyMarkup = keyboards.KeyboardBackButton("generate_menu")
+	case "2":
+		msg = tgbotapi.NewMessage(update.FromChat().ID, "Your image will be ready soon.")
+		msg.ReplyMarkup = keyboards.KeyboardBackButton("generate_menu")
+	case "3":
+		msg = tgbotapi.NewMessage(update.FromChat().ID, "Your image will be ready soon.")
+		msg.ReplyMarkup = keyboards.KeyboardBackButton("generate_menu")
+	}
 	return
 }

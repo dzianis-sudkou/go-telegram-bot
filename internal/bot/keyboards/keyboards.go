@@ -8,6 +8,9 @@ import (
 func KeyboardStart(locale string) tgbotapi.InlineKeyboardMarkup {
 	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(services.GetTextLocale(locale, "generateButton"), "generate_menu"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(services.GetTextLocale(locale, "requestButton"), "request_0"),
 			tgbotapi.NewInlineKeyboardButtonData(services.GetTextLocale(locale, "downloadButton"), "download_0"),
 		),
@@ -99,8 +102,8 @@ func KeyboardPaidPictureRequest() tgbotapi.InlineKeyboardMarkup {
 	return keyboard
 }
 
-func KeyboardFreeRequestStart() tgbotapi.InlineKeyboardMarkup {
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+func KeyboardFreeRequestStart() (keyboard tgbotapi.InlineKeyboardMarkup) {
+	keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("➡️", "request_make"),
 		),
@@ -108,5 +111,53 @@ func KeyboardFreeRequestStart() tgbotapi.InlineKeyboardMarkup {
 			tgbotapi.NewInlineKeyboardButtonData("↩️", "request_0"),
 		),
 	)
-	return keyboard
+	return
+}
+
+func KeyboardGenerateMenu() (keyboard tgbotapi.InlineKeyboardMarkup) {
+	keyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("1️⃣ Creative Dream Style (4 🪙)", "generate_1"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("2️⃣ Realism Style (2 🪙)", "generate_2"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("3️⃣ Anime Style (2 🪙)", "generate_3"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🪙 Add credits 🪙", "payment_menu"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🏠 Main Menu 🏠", "start"),
+		),
+	)
+	return
+}
+
+func KeyboardPayment() (keyboard tgbotapi.InlineKeyboardMarkup) {
+	keyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("⭐️1000 (🪙 80)", "payment_1000"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("⭐️500 (🪙 40)", "payment_500"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("⭐️250 (🪙 20)", "payment_250"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("↩️", "generate_menu"),
+		),
+	)
+	return
+}
+
+func KeyboardBackButton(baskState string) (keyboard tgbotapi.InlineKeyboardMarkup) {
+	keyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("↩️", baskState),
+		),
+	)
+	return
 }

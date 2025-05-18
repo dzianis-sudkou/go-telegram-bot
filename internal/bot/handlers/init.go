@@ -41,8 +41,12 @@ func Init(bot *tgbotapi.BotAPI, botDone *chan struct{}) {
 
 func newUpdateConfig(bot *tgbotapi.BotAPI) (updateConfig tgbotapi.UpdateConfig) {
 	update, _ := bot.GetUpdates(tgbotapi.NewUpdate(0))
-	log.Println("Pending Updates: ", len(update))
-	updateConfig = tgbotapi.NewUpdate(update[len(update)-1].UpdateID + 1)
+	if len(update) != 0 {
+		log.Println("Pending Updates: ", len(update))
+		updateConfig = tgbotapi.NewUpdate(update[len(update)-1].UpdateID + 1)
+	} else {
+		updateConfig = tgbotapi.NewUpdate(0)
+	}
 	updateConfig.Timeout = 30
 	updateConfig.AllowedUpdates = []string{"message", "callback_query", "pre_checkout_query", "shipping_query", "chat_member"}
 	return

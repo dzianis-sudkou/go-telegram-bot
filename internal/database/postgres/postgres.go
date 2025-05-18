@@ -82,7 +82,6 @@ func GenerateLocales(db *gorm.DB) {
 				}
 				db.Create(&locale)
 			}
-
 		}
 	}
 }

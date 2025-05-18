@@ -14,13 +14,15 @@ import (
 
 func AddNewUser(update *tgbotapi.Update) {
 	var newUser = models.User{
-		TgId:                 update.Message.From.ID,
-		FullName:             update.Message.From.FirstName + update.Message.From.LastName,
+		ChatId:               update.FromChat().ID,
+		TgId:                 update.SentFrom().ID,
+		FullName:             update.SentFrom().FirstName + update.SentFrom().LastName,
 		MsgCount:             0,
 		FreeRequestCount:     0,
+		Credits:              0,
 		GeneratedImagesCount: 0,
 		RegistrationDate:     time.Now(),
-		State:                "null",
+		State:                "start",
 		Authorized:           false,
 	}
 
@@ -88,4 +90,23 @@ func GetUser(update *tgbotapi.Update) (user models.User) {
 		log.Printf("User not found: %v", err)
 	}
 	return
+}
+
+func ChangeBalance(amount int, update *tgbotapi.Update) {
+	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	if err != nil {
+		log.Printf("User not found: %v", err)
+	}
+	user.Credits += amount
+	if err := repositories.UpdateUser(&user); err != nil {
+		log.Printf("Update user: %v", err)
+	}
+}
+
+func EnoughCoins(amount int, update *tgbotapi.Update) bool {
+	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	if err != nil {
+		log.Printf("User not found: %v", err)
+	}
+	return user.Credits >= amount
 }

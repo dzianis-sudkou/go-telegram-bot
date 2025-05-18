@@ -5,10 +5,12 @@ import "time"
 // 1. Table user in database
 type User struct {
 	ID                   uint `gorm:"primaryKey"`
+	ChatId               int64
 	TgId                 int64
 	FullName             string
 	MsgCount             uint
 	FreeRequestCount     uint
+	Credits              int
 	GeneratedImagesCount uint
 	RegistrationDate     time.Time
 	State                string

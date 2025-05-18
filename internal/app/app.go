@@ -2,6 +2,8 @@ package app
 
 import (
 	"log"
+	"os"
+	"os/signal"
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/bot/client"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/database/postgres"
@@ -21,9 +23,21 @@ func Run() {
 		log.Fatalf("Read .env file error: %v", err)
 	}
 
+	// Create channel for interrupt
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt)
+
 	// Start the DB connection
 	repositories.DB = postgres.Init()
 
 	// Start the Bot
-	client.Init()
+	botDone := make(chan struct{})
+
+	go client.Init(&botDone)
+
+	// Handle channels
+	<-interrupt
+	log.Println("Interrupt signal received. Initiating shutdown.")
+	close(botDone)
+	log.Println("Application shut down gracefully")
 }

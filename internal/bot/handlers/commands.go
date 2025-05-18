@@ -20,11 +20,15 @@ func Commands(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		cmdHelp(bot, update)
 	case "newPost":
 		msg = cmdNewPost(bot, update)
+	case "payment":
+		cmdNewInvoice(bot, update)
 	}
 
-	msg.ParseMode = "HTML"
-	if _, err := bot.Send(msg); err != nil {
-		log.Printf("Sending the message error: %v", err)
+	if msg.Text != "" {
+		msg.ParseMode = "HTML"
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Sending the message error: %v", err)
+		}
 	}
 }
 
@@ -85,4 +89,31 @@ func cmdNewPost(bot *tgbotapi.BotAPI, update tgbotapi.Update) (msg tgbotapi.Mess
 		msg = tgbotapi.NewMessage(update.FromChat().ID, "I'm sorry, you don't have access to this command.")
 	}
 	return
+}
+
+func cmdNewInvoice(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+	prices := []tgbotapi.LabeledPrice{
+		{
+			Label:  "Pay for 10 credits",
+			Amount: 1,
+		},
+	}
+
+	invoice := tgbotapi.NewInvoice(update.FromChat().ID, "Test invoice", "description here", "custom_payload", "", "start_param", "XTR", prices)
+	invoice.SuggestedTipAmounts = []int{}
+
+	if _, err := bot.Send(invoice); err != nil {
+		log.Printf("Sending the invoice error: %v", err)
+	}
+}
+
+func handlePrecheckoutQuery(bot *tgbotapi.BotAPI, update *tgbotapi.Update) {
+	pca := tgbotapi.PreCheckoutConfig{
+		OK:                 true,
+		PreCheckoutQueryID: update.PreCheckoutQuery.ID,
+	}
+
+	if _, err := bot.Request(pca); err != nil {
+		log.Printf("Answer preckout query: %v", err)
+	}
 }

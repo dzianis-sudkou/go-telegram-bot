@@ -16,6 +16,10 @@ func Messages(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	state := services.GetUserState(&update)
 	stateSlice := strings.Split(state, "_")
 
+	if update.Message.SuccessfulPayment != nil {
+		log.Println(update.Message.SuccessfulPayment.TelegramPaymentChargeID)
+	}
+
 	switch stateSlice[0] {
 	case "newPost":
 		msg = msgNewPost(&update, &stateSlice)
@@ -30,9 +34,12 @@ func Messages(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		}
 		msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
 	}
-	msg.ParseMode = "HTML"
-	if _, err := bot.Send(msg); err != nil {
-		log.Printf("Message sending error: %v", err)
+
+	if msg.Text != "" {
+		msg.ParseMode = "HTML"
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Message sending error: %v", err)
+		}
 	}
 }
 

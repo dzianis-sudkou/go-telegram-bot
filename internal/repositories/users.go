@@ -9,9 +9,9 @@ import (
 
 // CREATE
 
-func CreateUser(user *models.User) error {
-	result := DB.Create(user)
-	return result.Error
+func CreateUser(user *models.User) (err error) {
+	err = DB.Create(user).Error
+	return
 }
 
 func IsLogged(user *models.User) bool {
@@ -30,10 +30,9 @@ func IsLogged(user *models.User) bool {
 
 // READ
 
-func GetAllUsers() ([]models.User, error) {
-	var users []models.User
-	result := DB.Table("users").Find(&users)
-	return users, result.Error
+func GetAllUsers() (users []models.User, err error) {
+	err = DB.Table("users").Find(&users).Error
+	return
 }
 
 func GetUserByTgId(id int64) (user models.User, err error) {
@@ -43,7 +42,7 @@ func GetUserByTgId(id int64) (user models.User, err error) {
 
 // UPDATE
 
-func UpdateUser(user *models.User) error {
-	result := DB.Save(user)
-	return result.Error
+func UpdateUser(user *models.User) (err error) {
+	err = DB.Save(user).Error
+	return
 }

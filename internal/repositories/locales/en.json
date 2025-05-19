@@ -1,5 +1,5 @@
 {
-  "start": "<b>Hello %s</b>\nThis is the bot <b>Creative Dream Bot</b>.\n\nHere you can:\n<b>1.</b> Make a request for your own character.\n<b>2.</b> Download my pictures without watermark in the best quality.",
+  "start": "<b>Hello %s</b>\nThis is the bot <b>Creative Dream Bot</b>.\n\nHere you can:\n<b>1.</b> Generate your own <i>image</i> using our best models.\n<b>2.</b> Make a request for your own character.\n<b>3.</b> Download my pictures without watermark in the best quality.",
   "not_subscribed": "To use this bot, you should be subscribed to my channel!",
 
   "generateButton": "🎨 Generate Image 🎨",
@@ -13,10 +13,23 @@
   "support": "<b>💵 Support Channel 💵</b>",
 
   "generate_menu": "<b>Generate Image: <i>Menu</i></b>\n\n<i>%s</i>\nGenerated images: %d 🎨\nBalance: %d 🪙 (⭐️ %d)\n",
+  "generate_menu_buttons": "1️⃣ Creative Dream Style (4 🪙)\n2️⃣ Realism Style (2 🪙)\n3️⃣ Anime Style (2 🪙)\n🪙 Add Coins 🪙\n🏠 Main Menu 🏠",
+  "generate_prompt": "Send me the <i>description</i> of the image 📝.\nI'll <b>create</b> it for you 😉",
+  "processing_generation": "⏳ <b>Processing generation</b> ⏳",
+  "completed_generation": "🎨 <b>Image is Ready</b> 🎨",
+  "after_completed_generation": "⬇️<b> Generate Menu </b>⬇️",
+
+  "insufficient_funds": "You don't have <i>enough</i> <b>coins</b>. 🪙\n<b>Top up</b> your <i>balance</i> and come back here.",
+
+  "not_available": "I'm sorry this feature is <i>not available <b>yet</b></i> 😔\nPlease come back <b>later</b>",
+
+  "detected_nsfw": "Generated image <b>violates</b> bot's rules! 🔞",
 
   "payment_menu": "Choose the top-up option:",
   "balance_up_title": "🪙 %d coins",
   "balance_up_description": "Top up balance for 🪙 %d coins.",
+
+  "successful_payment": "🪙 <b>Your payment was successful</b> 🪙",
 
   "request_0": "<b>1️⃣ - (PAID)</b> Skip the queue and get your image as soon as possible.\n<b>2️⃣ - (FREE)</b> Your request will be added to the queue and will be processed.\n\nChoose a type of your request:",
   "request_1": "Your request will be added to the queue and will be processed as soon as possible.\nThe waiting time may vary depending on the complexity of the request.\n\nPaid request price list:\n\nRegular pics (like on @gokuryo_art channel):\n• 5$ for 1 picture.\n• 15$ for a 4-picture pack.\n<b>! ! ! Regular pictures</b> will be posted on the @gokuryo_art channel\n\nNSFW / Hentai pics (you can access the nsfw chat room after the purchase)\n• 7$ for 1 picture\n• 20$ for a 4 picture pack.\n<b>! ! ! NSFW pictures</b> can be posted to the NSFW chat or not as you wish.\n\nPlease use <b>PayPal</b> to pay for your request, and then proceed with the arrow.\n\nPlease write this in the payment description: %s",

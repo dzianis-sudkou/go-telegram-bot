@@ -49,7 +49,7 @@ func Callbacks(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	if msg.Text != "" {
 		msg.ParseMode = "HTML"
 		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Callback Error: %v", err)
+			log.Printf("Send callback: %v", err)
 		}
 	}
 }
@@ -57,19 +57,17 @@ func Callbacks(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 func callbackStart(bot *tgbotapi.BotAPI, update *tgbotapi.Update) (msg tgbotapi.EditMessageTextConfig) {
 	services.SetUserState(update, "start")
 	if services.IsSubscribed(bot, update.CallbackQuery.From.ID) {
-		text := fmt.Sprintf(services.GetTextLocale(update.CallbackQuery.From.LanguageCode, update.CallbackData()), update.CallbackQuery.From.FirstName+update.CallbackQuery.From.LastName)
 		msg = tgbotapi.NewEditMessageTextAndMarkup(
 			update.CallbackQuery.Message.Chat.ID,
 			update.CallbackQuery.Message.MessageID,
-			text,
+			fmt.Sprintf(services.GetTextLocale(update.SentFrom().LanguageCode, "start"), update.SentFrom().FirstName+update.SentFrom().LastName),
 			keyboards.KeyboardStart(update.CallbackQuery.From.LanguageCode),
 		)
 	} else {
-		text := "To use this bot, you should be subscribed to my channel!"
 		msg = tgbotapi.NewEditMessageTextAndMarkup(
 			update.CallbackQuery.Message.Chat.ID,
 			update.CallbackQuery.Message.MessageID,
-			text,
+			services.GetTextLocale(update.SentFrom().LanguageCode, "not_subscribed"),
 			keyboards.KeyboardSubscribe(),
 		)
 	}
@@ -97,49 +95,32 @@ func callbackGenerate(update *tgbotapi.Update, callbackData *[]string) (msg tgbo
 			update.FromChat().ID,
 			update.CallbackQuery.Message.MessageID,
 			text,
-			keyboards.KeyboardGenerateMenu(),
+			keyboards.KeyboardGenerateMenu(update.SentFrom().LanguageCode),
 		)
 
 	case "1":
 		msg = tgbotapi.NewEditMessageTextAndMarkup(
 			update.FromChat().ID,
 			update.CallbackQuery.Message.MessageID,
-			"I'm sorry this feature is not available yet 😔\nCome back later",
+			services.GetTextLocale(update.SentFrom().LanguageCode, "not_available"),
 			keyboards.KeyboardBackButton("generate_menu"),
 		)
 
-	case "2":
+	case "2", "3":
 		if services.EnoughCoins(2, update) {
 			services.SetUserState(update, state)
 			msg = tgbotapi.NewEditMessageTextAndMarkup(
 				update.FromChat().ID,
 				update.CallbackQuery.Message.MessageID,
-				"Now send the description of the image in the realism style.\nAnd I'll create it for you.",
+				services.GetTextLocale(update.SentFrom().LanguageCode, "generate_prompt"),
 				keyboards.KeyboardBackButton("generate_menu"),
 			)
 		} else {
 			msg = tgbotapi.NewEditMessageTextAndMarkup(
 				update.FromChat().ID,
 				update.CallbackQuery.Message.MessageID,
-				"You don't have enough coins. 🪙\nTop up your balance and come back here.",
-				keyboards.KeyboardBackButton("generate_menu"),
-			)
-		}
 
-	case "3":
-		if services.EnoughCoins(2, update) {
-			services.SetUserState(update, state)
-			msg = tgbotapi.NewEditMessageTextAndMarkup(
-				update.FromChat().ID,
-				update.CallbackQuery.Message.MessageID,
-				"Now send the description of the image in the anime style.\nAnd I'll create it for you.",
-				keyboards.KeyboardBackButton("generate_menu"),
-			)
-		} else {
-			msg = tgbotapi.NewEditMessageTextAndMarkup(
-				update.FromChat().ID,
-				update.CallbackQuery.Message.MessageID,
-				"You don't have enough coins. 🪙\nTop up your balance and come back here.",
+				services.GetTextLocale(update.SentFrom().LanguageCode, "insufficient_funds"),
 				keyboards.KeyboardBackButton("generate_menu"),
 			)
 		}
@@ -153,7 +134,7 @@ func callbackPayment(bot *tgbotapi.BotAPI, update *tgbotapi.Update, callbackData
 
 	switch (*callbackData)[1] {
 
-	// Generate image menu
+	// Payment menu
 	case "menu":
 		text := services.GetTextLocale(update.SentFrom().LanguageCode, "payment_menu")
 		msg = tgbotapi.NewEditMessageTextAndMarkup(
@@ -186,7 +167,7 @@ func createNewInvoice(bot *tgbotapi.BotAPI, update *tgbotapi.Update, amount int)
 	title := fmt.Sprintf(services.GetTextLocale(update.SentFrom().LanguageCode, "balance_up_title"), int(float64(amount)/12.5))
 	description := fmt.Sprintf(services.GetTextLocale(update.SentFrom().LanguageCode, "balance_up_description"), int(float64(amount)/12.5))
 
-	invoice := tgbotapi.NewInvoice(update.FromChat().ID, title, description, "custom_payload", "", "start_param", "XTR", prices)
+	invoice := tgbotapi.NewInvoice(update.FromChat().ID, title, description, "Coins for the image generation", "", "start_param", "XTR", prices)
 	invoice.SuggestedTipAmounts = []int{}
 
 	if _, err := bot.Send(invoice); err != nil {
@@ -254,7 +235,12 @@ func callbackDownload(update *tgbotapi.Update, callbackData *[]string) (msg tgbo
 
 	// Menu for the download
 	case "0":
-		msg = tgbotapi.NewEditMessageTextAndMarkup(update.FromChat().ID, update.CallbackQuery.Message.MessageID, text, keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode))
+		msg = tgbotapi.NewEditMessageTextAndMarkup(
+			update.FromChat().ID,
+			update.CallbackQuery.Message.MessageID,
+			text,
+			keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode),
+		)
 	}
 	return
 }

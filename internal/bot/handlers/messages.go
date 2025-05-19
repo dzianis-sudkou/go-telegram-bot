@@ -6,15 +6,16 @@ import (
 	"strings"
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/bot/keyboards"
+	"github.com/dzianis-sudkou/go-telegram-bot/internal/models"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func Messages(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+func Messages(bot *tgbotapi.BotAPI, update tgbotapi.Update, requestCh chan models.GeneratedImage) {
 	var msg tgbotapi.MessageConfig
 
 	state := services.GetUserState(&update)
-
+	log.Printf("Message from User ID: %d", update.Message.MessageID)
 	if update.Message.SuccessfulPayment != nil {
 		log.Println(update.Message.SuccessfulPayment.TelegramPaymentChargeID, update.Message.SuccessfulPayment.TotalAmount)
 		msg = msgSuccessfulPayment(&update)
@@ -42,7 +43,7 @@ func Messages(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 			msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
 
 		case "generate":
-			msg = msgGenerate(&update, &stateSlice)
+			msg = msgGenerate(bot, &update, &stateSlice, requestCh)
 		}
 	}
 
@@ -88,25 +89,38 @@ func msgNewRequest(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 }
 
 func msgSuccessfulPayment(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
-	services.SetUserState(update, "successfulPayment")
+	services.SetUserState(update, "start")
+	services.AddNewPayment(update.Message.SuccessfulPayment)
 	services.ChangeBalance(update.Message.SuccessfulPayment.TotalAmount, update)
-	msg = tgbotapi.NewMessage(update.FromChat().ID, "Your payment was successful, thank you!")
+	msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "successful_payment"))
 	msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
 	return
 }
 
-func msgGenerate(update *tgbotapi.Update, stateSlice *[]string) (msg tgbotapi.MessageConfig) {
+func msgGenerate(bot *tgbotapi.BotAPI, update *tgbotapi.Update, stateSlice *[]string, requestCh chan models.GeneratedImage) (msg tgbotapi.MessageConfig) {
 	switch (*stateSlice)[1] {
 	case "menu":
-	case "1":
-		msg = tgbotapi.NewMessage(update.FromChat().ID, "Your image will be ready soon.")
-		msg.ReplyMarkup = keyboards.KeyboardBackButton("generate_menu")
-	case "2":
-		msg = tgbotapi.NewMessage(update.FromChat().ID, "Your image will be ready soon.")
-		msg.ReplyMarkup = keyboards.KeyboardBackButton("generate_menu")
-	case "3":
-		msg = tgbotapi.NewMessage(update.FromChat().ID, "Your image will be ready soon.")
-		msg.ReplyMarkup = keyboards.KeyboardBackButton("generate_menu")
+	case "1", "2", "3":
+
+		// Remove previous message
+		if _, err := bot.Request(tgbotapi.NewDeleteMessage(update.FromChat().ID, update.Message.MessageID-1)); err != nil {
+			log.Printf("Delete Message %d: %v", update.Message.MessageID, err)
+		}
+
+		switch (*stateSlice)[1] {
+		case "1":
+			services.AddNewGeneratedImage(update, "creativedream", requestCh)
+			services.ChangeBalance(-4, update)
+		case "2":
+			services.AddNewGeneratedImage(update, "realism", requestCh)
+			services.ChangeBalance(-2, update)
+		case "3":
+			services.AddNewGeneratedImage(update, "anime", requestCh)
+			services.ChangeBalance(-2, update)
+		}
+
+		msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "processing_generation"))
+
 	}
 	return
 }

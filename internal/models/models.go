@@ -16,7 +16,6 @@ type User struct {
 	State                string
 	Authorized           bool
 	FreeRequests         []FreeRequest
-	GeneratedImages      []GeneratedImage
 }
 
 // 2. Table posts in database
@@ -46,20 +45,37 @@ type FreeRequest struct {
 // 5. Table generated_images in database
 type GeneratedImage struct {
 	ID       uint `gorm:"primaryKey"`
+	Message  int64
+	Prompt   string
 	TaskUUID string
 	ImageURL string
 	Done     bool
-	UserID   uint
+	Chat     int64
+	Model    string
+	Language string
+	NSFW     bool
 }
 
+// 6. RU locales table
 type RuLocale struct {
 	ID    uint   `gorm:"primaryKey"`
 	State string `gorm:"uniqueIndex"`
 	Text  string
 }
 
+// 7. EN locales table
 type EnLocale struct {
 	ID    uint   `gorm:"primaryKey"`
 	State string `gorm:"uniqueIndex"`
 	Text  string
+}
+
+type Payment struct {
+	ID                      uint `gorm:"primaryKey"`
+	Currency                string
+	TotalAmount             int
+	InvoicePayload          string
+	ShippingOptionID        string
+	TelegramPaymentChargeId string
+	ProviderPaymentChargeId string
 }

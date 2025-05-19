@@ -1,6 +1,8 @@
 package keyboards
 
 import (
+	"strings"
+
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -114,22 +116,24 @@ func KeyboardFreeRequestStart() (keyboard tgbotapi.InlineKeyboardMarkup) {
 	return
 }
 
-func KeyboardGenerateMenu() (keyboard tgbotapi.InlineKeyboardMarkup) {
+func KeyboardGenerateMenu(locale string) (keyboard tgbotapi.InlineKeyboardMarkup) {
+	buttons := strings.Split(services.GetTextLocale(locale, "generate_menu_buttons"), "\n")
+
 	keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("1️⃣ Creative Dream Style (4 🪙)", "generate_1"),
+			tgbotapi.NewInlineKeyboardButtonData(buttons[0], "generate_1"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("2️⃣ Realism Style (2 🪙)", "generate_2"),
+			tgbotapi.NewInlineKeyboardButtonData(buttons[1], "generate_2"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("3️⃣ Anime Style (2 🪙)", "generate_3"),
+			tgbotapi.NewInlineKeyboardButtonData(buttons[2], "generate_3"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🪙 Add credits 🪙", "payment_menu"),
+			tgbotapi.NewInlineKeyboardButtonData(buttons[3], "payment_menu"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🏠 Main Menu 🏠", "start"),
+			tgbotapi.NewInlineKeyboardButtonData(buttons[4], "start"),
 		),
 	)
 	return

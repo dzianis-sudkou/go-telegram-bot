@@ -7,7 +7,9 @@ import (
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/bot/client"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/database/postgres"
+	"github.com/dzianis-sudkou/go-telegram-bot/internal/models"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/repositories"
+	"github.com/dzianis-sudkou/go-telegram-bot/internal/websocket"
 	"github.com/joho/godotenv"
 )
 
@@ -27,13 +29,19 @@ func Run() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
+	// Create channels for websocket-bot comunication
+	requestGenerateChannel := make(chan models.GeneratedImage)
+	responseGenerateChannel := make(chan models.GeneratedImage)
+
 	// Start the DB connection
 	repositories.DB = postgres.Init()
 
 	// Start the Bot
 	botDone := make(chan struct{})
+	go client.Init(&botDone, requestGenerateChannel, responseGenerateChannel)
 
-	go client.Init(&botDone)
+	// Start the Websocket connection
+	go websocket.Init(requestGenerateChannel, responseGenerateChannel)
 
 	// Handle channels
 	<-interrupt

@@ -44,6 +44,7 @@ func CreateTables(db *gorm.DB) {
 		&models.GeneratedImage{},
 		&models.EnLocale{},
 		&models.RuLocale{},
+		&models.Payment{},
 	)
 	if err != nil {
 		log.Fatalf("Table creation error: %v", err)

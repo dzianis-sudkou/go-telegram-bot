@@ -18,6 +18,10 @@ func Commands(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	case "start":
 		msg = cmdStart(bot, update)
 
+	case "testGenerate":
+		log.Println("Balance were changed!")
+		services.ChangeBalance(100, &update)
+
 	case "newPost":
 		msg = cmdNewPost(update)
 	}
@@ -31,6 +35,7 @@ func Commands(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 }
 
 func cmdStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) (msg tgbotapi.MessageConfig) {
+
 	// Control if the user is subscribed to the channel
 	if services.IsSubscribed(bot, update.Message.From.ID) {
 

@@ -40,5 +40,7 @@
   "request_wrong": "You can't send me request now. Please follow insructions.",
 
   "download_0": "<b>Download</b>\n\nTo Download my pictures in the best quality and without watermark, send me a number of publication.\n\nHow to knew a number you need:\n<b>1.</b> Open publication in my group - @gokuryo_art\n<b>2.</b> Copy the number from the description.",
-  "download_1": "Send me another post number, or press the number below"
+  "download_1": "Send me another post number, or press the number below",
+
+  "wrong_message": "Something gone wrong 😕\nPlease, use menu buttons"
 }

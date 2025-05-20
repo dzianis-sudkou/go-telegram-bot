@@ -31,7 +31,6 @@ func Messages(bot *tgbotapi.BotAPI, update tgbotapi.Update, requestCh chan model
 		// User asked to download images from the post
 		case "download":
 			msg = msgNewDownload(bot, &update)
-			msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
 
 		// User has made a request
 		case "request":
@@ -46,11 +45,11 @@ func Messages(bot *tgbotapi.BotAPI, update tgbotapi.Update, requestCh chan model
 			msg = msgGenerate(&update, &stateSlice, requestCh)
 		}
 	}
-
 	if msg.Text == "" {
-		msg = tgbotapi.NewMessage(update.FromChat().ID, "I'm sorry, your request is wrong")
+		msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "wrong_message"))
 		msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
 	}
+
 	msg.ParseMode = "HTML"
 	if _, err := bot.Send(msg); err != nil {
 		log.Printf("Message sending error: %v", err)
@@ -72,12 +71,13 @@ func msgNewDownload(bot *tgbotapi.BotAPI, update *tgbotapi.Update) (msg tgbotapi
 	var mediaGroupDocs []any
 	images := services.GetImagesByPostId(update, update.Message.Text)
 	for _, image := range images {
-		mediaGroupDocs = append(mediaGroupDocs, tgbotapi.NewInputMediaDocument(tgbotapi.FileID(image.ImageID)))
+		mediaGroupDocs = append(mediaGroupDocs, tgbotapi.NewInputMediaDocument(tgbotapi.FileID(image.ImageHash)))
 	}
 	if _, err := bot.SendMediaGroup(tgbotapi.MediaGroupConfig{ChatID: update.FromChat().ID, Media: mediaGroupDocs}); err != nil {
 		log.Printf("Send media group: %v", err)
 	}
 	msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "download_1"))
+	msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
 	return
 }
 
@@ -99,7 +99,6 @@ func msgSuccessfulPayment(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) 
 
 func msgGenerate(update *tgbotapi.Update, stateSlice *[]string, requestCh chan models.GeneratedImage) (msg tgbotapi.MessageConfig) {
 	switch (*stateSlice)[1] {
-	case "menu":
 	case "anime", "realism", "creativedream":
 		services.SetUserState(update, "start")
 		switch (*stateSlice)[1] {
@@ -113,7 +112,6 @@ func msgGenerate(update *tgbotapi.Update, stateSlice *[]string, requestCh chan m
 			services.AddNewGeneratedImage(update, "creativedream", requestCh)
 			services.ChangeBalance(-2, update)
 		}
-
 		msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "processing_generation"))
 	}
 	return

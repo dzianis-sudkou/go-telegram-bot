@@ -17,9 +17,9 @@ func AddNewImage(update *tgbotapi.Update, post string) {
 	}
 
 	newImage := models.Image{
-		Name:    update.Message.Document.FileName,
-		ImageID: update.Message.Document.FileID,
-		PostID:  uint(postId),
+		Name:      update.Message.Document.FileName,
+		ImageHash: update.Message.Document.FileID,
+		PostID:    uint(postId),
 	}
 
 	if err := repositories.CreateImage(&newImage); err != nil {

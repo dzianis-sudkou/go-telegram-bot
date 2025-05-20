@@ -81,8 +81,7 @@ func callbackGenerate(update *tgbotapi.Update, callbackData *[]string) (msg tgbo
 
 	// Menu that prints all the information and let's user choose the model
 	case "menu", "acceptrules":
-		switch (*callbackData)[1] {
-		case "acceptrules":
+		if (*callbackData)[1] == "acceptrules" {
 			services.AcceptRules(update)
 		}
 		// Prints all the rules if the user hasn't accepted rules

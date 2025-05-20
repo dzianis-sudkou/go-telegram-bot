@@ -103,6 +103,17 @@ func ChangeBalance(amount int, update *tgbotapi.Update) {
 	}
 }
 
+func ChangeUserBalance(tgId int64, amount int) {
+	user, err := repositories.GetUserByTgId(tgId)
+	if err != nil {
+		log.Printf("User not found: %v", err)
+	}
+	user.Credits += amount
+	if err := repositories.UpdateUser(&user); err != nil {
+		log.Printf("Update user: %v", err)
+	}
+}
+
 func IsEnoughCoins(amount int, update *tgbotapi.Update) bool {
 	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
 	if err != nil {

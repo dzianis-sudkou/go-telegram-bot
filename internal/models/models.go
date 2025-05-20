@@ -27,10 +27,10 @@ type Post struct {
 
 // 3 Table images in database
 type Image struct {
-	ID      uint `gorm:"primaryKey"`
-	Name    string
-	ImageID string
-	PostID  uint
+	ID        uint `gorm:"primaryKey"`
+	Name      string
+	ImageHash string
+	PostID    uint
 }
 
 // 4. Table free_requests in database

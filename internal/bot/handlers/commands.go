@@ -3,6 +3,8 @@ package handlers
 import (
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/bot/keyboards"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/services"
@@ -18,22 +20,22 @@ func Commands(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	case "start":
 		msg = cmdStart(bot, update)
 
-	case "testGenerate":
-		log.Println("Balance were changed!")
-		services.ChangeBalance(100, &update)
+	case "addCredits":
+		msg = cmdAddCredits(&update)
 
 	case "downloadAllImages":
-		cmdDownloadAllImages(bot, &update)
+		msg = cmdDownloadAllImages(bot, &update)
 
 	case "newPost":
 		msg = cmdNewPost(update)
+	default:
+		msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "wrong_message"))
+		msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
 	}
 
-	if msg.Text != "" {
-		msg.ParseMode = "HTML"
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Sending the message error: %v", err)
-		}
+	msg.ParseMode = "HTML"
+	if _, err := bot.Send(msg); err != nil {
+		log.Printf("Sending the message error: %v", err)
 	}
 }
 
@@ -91,11 +93,25 @@ func cmdDownloadAllImages(bot *tgbotapi.BotAPI, update *tgbotapi.Update) (msg tg
 			}
 			mediaGroupDocs = make([]any, 0)
 		}
-		mediaGroupDocs = append(mediaGroupDocs, tgbotapi.NewInputMediaDocument(tgbotapi.FileID(image.ImageID)))
+		mediaGroupDocs = append(mediaGroupDocs, tgbotapi.NewInputMediaDocument(tgbotapi.FileID(image.ImageHash)))
 	}
 	if _, err := bot.SendMediaGroup(tgbotapi.MediaGroupConfig{ChatID: update.FromChat().ID, Media: mediaGroupDocs}); err != nil {
 		log.Printf("Send media group: %v", err)
 	}
-	msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "download_1"))
+	msg = tgbotapi.NewMessage(update.FromChat().ID, "All images were sent.")
+	return
+}
+
+func cmdAddCredits(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
+	// Check if the user is admin
+	if services.IsAdmin(update) {
+		data := strings.Split(update.Message.CommandArguments(), " ") // [tgId, credits]
+		tgId, _ := strconv.ParseInt(data[0], 10, 64)
+		amount, _ := strconv.Atoi(data[1])
+		services.ChangeUserBalance(tgId, amount)
+		msg = tgbotapi.NewMessage(update.FromChat().ID, "Successful"+update.Message.CommandArguments())
+	} else {
+		msg = tgbotapi.NewMessage(update.FromChat().ID, "I'm sorry, you don't have access to this command.")
+	}
 	return
 }

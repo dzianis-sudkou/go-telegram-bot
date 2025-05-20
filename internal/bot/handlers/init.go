@@ -26,6 +26,7 @@ func Init(bot *tgbotapi.BotAPI, botDone *chan struct{}, requestCh chan models.Ge
 		select {
 		case update := <-updates:
 			if update.Message != nil {
+				services.UpdateMessageCount(&update)
 				if update.Message.IsCommand() {
 					Commands(bot, update)
 				} else {

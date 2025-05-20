@@ -13,3 +13,8 @@ func GetImagesByPostID(postId uint) (img []models.Image, err error) {
 	err = DB.Table("images").Where("post_id", postId).Scan(&img).Error
 	return
 }
+
+func GetAllImages() (img []models.Image, err error) {
+	err = DB.Table("images").Scan(&img).Error
+	return
+}

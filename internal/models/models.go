@@ -70,6 +70,7 @@ type EnLocale struct {
 	Text  string
 }
 
+// 8. Payments table
 type Payment struct {
 	ID                      uint `gorm:"primaryKey"`
 	Currency                string

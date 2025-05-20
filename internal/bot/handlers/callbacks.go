@@ -80,34 +80,41 @@ func callbackGenerate(update *tgbotapi.Update, callbackData *[]string) (msg tgbo
 	switch (*callbackData)[1] {
 
 	// Menu that prints all the information and let's user choose the model
-	case "menu":
+	case "menu", "acceptrules":
+		switch (*callbackData)[1] {
+		case "acceptrules":
+			services.AcceptRules(update)
+		}
+		// Prints all the rules if the user hasn't accepted rules
 		user := services.GetUser(update)
-		services.SetUserState(update, state)
-		text := fmt.Sprintf(
-			services.GetTextLocale(update.SentFrom().LanguageCode, "generate_menu"),
-			user.FullName,
-			user.GeneratedImagesCount,
-			user.Credits,
-			uint(float64(user.Credits)*12.5),
-		)
+		if !user.Authorized {
+			services.SetUserState(update, "generate_rules")
+			text := services.GetTextLocale(update.SentFrom().LanguageCode, "generate_rules")
+			msg = tgbotapi.NewEditMessageTextAndMarkup(
+				update.FromChat().ID,
+				update.CallbackQuery.Message.MessageID,
+				text,
+				keyboards.KeyboardAcceptRules(),
+			)
+		} else {
+			services.SetUserState(update, state)
+			text := fmt.Sprintf(
+				services.GetTextLocale(update.SentFrom().LanguageCode, "generate_menu"),
+				user.FullName,
+				user.GeneratedImagesCount,
+				user.Credits,
+				uint(float64(user.Credits)*12.5),
+			)
+			msg = tgbotapi.NewEditMessageTextAndMarkup(
+				update.FromChat().ID,
+				update.CallbackQuery.Message.MessageID,
+				text,
+				keyboards.KeyboardGenerateMenu(update.SentFrom().LanguageCode),
+			)
+		}
+	case "anime", "realism":
 
-		msg = tgbotapi.NewEditMessageTextAndMarkup(
-			update.FromChat().ID,
-			update.CallbackQuery.Message.MessageID,
-			text,
-			keyboards.KeyboardGenerateMenu(update.SentFrom().LanguageCode),
-		)
-
-	case "1":
-		msg = tgbotapi.NewEditMessageTextAndMarkup(
-			update.FromChat().ID,
-			update.CallbackQuery.Message.MessageID,
-			services.GetTextLocale(update.SentFrom().LanguageCode, "not_available"),
-			keyboards.KeyboardBackButton("generate_menu"),
-		)
-
-	case "2", "3":
-		if services.EnoughCoins(2, update) {
+		if services.IsEnoughCoins(2, update) {
 			services.SetUserState(update, state)
 			msg = tgbotapi.NewEditMessageTextAndMarkup(
 				update.FromChat().ID,
@@ -124,6 +131,14 @@ func callbackGenerate(update *tgbotapi.Update, callbackData *[]string) (msg tgbo
 				keyboards.KeyboardBackButton("generate_menu"),
 			)
 		}
+
+	case "creativedream":
+		msg = tgbotapi.NewEditMessageTextAndMarkup(
+			update.FromChat().ID,
+			update.CallbackQuery.Message.MessageID,
+			services.GetTextLocale(update.SentFrom().LanguageCode, "not_available"),
+			keyboards.KeyboardBackButton("generate_menu"),
+		)
 	}
 	return
 }

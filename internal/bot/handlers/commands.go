@@ -22,6 +22,9 @@ func Commands(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		log.Println("Balance were changed!")
 		services.ChangeBalance(100, &update)
 
+	case "downloadAllImages":
+		cmdDownloadAllImages(bot, &update)
+
 	case "newPost":
 		msg = cmdNewPost(update)
 	}
@@ -76,4 +79,23 @@ func handlePrecheckoutQuery(bot *tgbotapi.BotAPI, update *tgbotapi.Update) {
 	if _, err := bot.Request(pca); err != nil {
 		log.Printf("Answer preckout query: %v", err)
 	}
+}
+
+func cmdDownloadAllImages(bot *tgbotapi.BotAPI, update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
+	var mediaGroupDocs []any
+	images := services.GetAllImages(update)
+	for i, image := range images {
+		if i%10 == 0 {
+			if _, err := bot.SendMediaGroup(tgbotapi.MediaGroupConfig{ChatID: update.FromChat().ID, Media: mediaGroupDocs}); err != nil {
+				log.Printf("Send media group: %v", err)
+			}
+			mediaGroupDocs = make([]any, 0)
+		}
+		mediaGroupDocs = append(mediaGroupDocs, tgbotapi.NewInputMediaDocument(tgbotapi.FileID(image.ImageID)))
+	}
+	if _, err := bot.SendMediaGroup(tgbotapi.MediaGroupConfig{ChatID: update.FromChat().ID, Media: mediaGroupDocs}); err != nil {
+		log.Printf("Send media group: %v", err)
+	}
+	msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "download_1"))
+	return
 }

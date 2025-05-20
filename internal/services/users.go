@@ -103,10 +103,32 @@ func ChangeBalance(amount int, update *tgbotapi.Update) {
 	}
 }
 
-func EnoughCoins(amount int, update *tgbotapi.Update) bool {
+func IsEnoughCoins(amount int, update *tgbotapi.Update) bool {
 	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
 	if err != nil {
 		log.Printf("User not found: %v", err)
 	}
 	return user.Credits >= amount
+}
+
+func UpdateMessageCount(update *tgbotapi.Update) {
+	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	if err != nil {
+		log.Printf("User not found: %v", err)
+	}
+	user.MsgCount += 1
+	if err = repositories.UpdateUser(&user); err != nil {
+		log.Printf("Update user: %v", err)
+	}
+}
+
+func AcceptRules(update *tgbotapi.Update) {
+	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	if err != nil {
+		log.Printf("User not found: %v", err)
+	}
+	user.Authorized = true
+	if err = repositories.UpdateUser(&user); err != nil {
+		log.Printf("Update user: %v", err)
+	}
 }

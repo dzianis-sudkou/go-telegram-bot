@@ -10,6 +10,17 @@ import (
 )
 
 func AddNewGeneratedImage(update *tgbotapi.Update, model string, requestCh chan models.GeneratedImage) {
+
+	// Update user's number of generated images
+	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	if err != nil {
+		log.Printf("Get user by TG id: %v", err)
+	}
+	user.GeneratedImagesCount += 1
+	if err = repositories.UpdateUser(&user); err != nil {
+		log.Printf("Update user: %v", err)
+	}
+
 	image := models.GeneratedImage{
 		Message:  int64(update.Message.MessageID) + 1,
 		Prompt:   update.Message.Text,
@@ -19,6 +30,7 @@ func AddNewGeneratedImage(update *tgbotapi.Update, model string, requestCh chan 
 		Model:    model,
 		Language: update.SentFrom().LanguageCode,
 	}
+
 	if err := repositories.CreateGeneratedImage(&image); err != nil {
 		log.Printf("Save generated image: %v", err)
 	}

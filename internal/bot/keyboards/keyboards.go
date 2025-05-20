@@ -121,13 +121,13 @@ func KeyboardGenerateMenu(locale string) (keyboard tgbotapi.InlineKeyboardMarkup
 
 	keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(buttons[0], "generate_1"),
+			tgbotapi.NewInlineKeyboardButtonData(buttons[0], "generate_anime"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(buttons[1], "generate_2"),
+			tgbotapi.NewInlineKeyboardButtonData(buttons[1], "generate_realism"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(buttons[2], "generate_3"),
+			tgbotapi.NewInlineKeyboardButtonData(buttons[2], "generate_creativedream"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(buttons[3], "payment_menu"),
@@ -163,5 +163,18 @@ func KeyboardBackButton(baskState string) (keyboard tgbotapi.InlineKeyboardMarku
 			tgbotapi.NewInlineKeyboardButtonData("↩️", baskState),
 		),
 	)
+	return
+}
+
+func KeyboardAcceptRules() (keyboard tgbotapi.InlineKeyboardMarkup) {
+	keyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("✅", "generate_acceptrules"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("↩️", "start"),
+		),
+	)
+
 	return
 }

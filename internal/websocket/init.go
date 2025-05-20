@@ -10,39 +10,62 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type RequestPayload struct {
-	ApiKey         string  `json:"apiKey"`
-	TaskType       string  `json:"taskType"`
-	TaskUUID       string  `json:"taskUUID"`
+type RequestImage struct {
+	TaskType string `json:"taskType"`
+	TaskUUID string `json:"taskUUID"`
+
 	OutputType     string  `json:"outputType"`
-	Width          int     `json:"width"`
-	Height         int     `json:"height"`
 	OutputFormat   string  `json:"outputFormat"`
+	OutputQuality  int     `json:"outputQuality"`
+	CheckNSFW      bool    `json:"checkNSFW"`
+	IncludeCost    bool    `json:"includeCost"`
 	PositivePrompt string  `json:"positivePrompt"`
 	NegativePrompt string  `json:"negativePrompt"`
 	Model          string  `json:"model"`
+	Strength       float64 `json:"strength"`
 	Steps          int     `json:"steps"`
-	CFGScale       float64 `json:"CFGScale"`
 	Scheduler      string  `json:"scheduler"`
-	NumberResults  int     `json:"numberResults"`
-	Ping           bool    `json:"ping"`
-	IncludeCost    bool    `json:"includeCost"`
-	CheckNSFW      bool    `json:"checkNSFW"`
+	CFGScale       float64 `json:"CFGScale"`
 	ClipSkip       int     `json:"clipSkip"`
+	NumberResults  int     `json:"numberResults"`
+	Lora           []Lora  `json:"lora"`
+	Width          int     `json:"width"`
+	Height         int     `json:"height"`
+}
+
+type Lora struct {
+	Model  string  `json:"model"`
+	Weight float64 `json:"weight"`
+}
+
+type Authentication struct {
+	TaskType string `json:"taskType"`
+	ApiKey   string `json:"apiKey"`
+}
+
+type Ping struct {
+	TaskType string `json:"taskType"`
+	Ping     bool   `json:"ping"`
 }
 
 type ResponsePayload struct {
-	TaskType              string  `json:"taskType"`
-	TaskUUID              string  `json:"taskUUID"`
-	ImageUUID             string  `json:"imageUUID"`
-	ImageURL              string  `json:"imageURL"`
-	ImageBase64Data       string  `json:"imageBase64Data"`
-	ImageDataURI          string  `json:"imageDataURI"`
-	Seed                  uint64  `json:"seed"`
-	NSFWContent           bool    `json:"NSFWContent"`
-	Cost                  float64 `json:"cost"`
-	Pong                  bool    `json:"pong"`
-	ConnectionSessionUUID string  `json:"connectionSessionUUID"`
+	TaskType string `json:"taskType"`
+
+	// Authentication
+	ConnectionSessionUUID string `json:"connectionSessionUUID"`
+
+	// Keeping Connection Alive
+	Pong bool `json:"pong"`
+
+	// Image Generation
+	TaskUUID        string  `json:"taskUUID"`
+	ImageUUID       string  `json:"imageUUID"`
+	ImageURL        string  `json:"imageURL"`
+	ImageBase64Data string  `json:"imageBase64Data"`
+	ImageDataURI    string  `json:"imageDataURI"`
+	Seed            uint64  `json:"seed"`
+	NSFWContent     bool    `json:"NSFWContent"`
+	Cost            float64 `json:"cost"`
 }
 
 // The Response we receive from the server
@@ -63,13 +86,12 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 	defer conn.Close() // Close connection when function exits
 
 	// Send Authentication message
-	authPayload := []RequestPayload{
+	authPayload := []Authentication{
 		{
-			ApiKey:   config.Config("CREATIVEDREAM_WEBSOCKET_API_KEY"),
 			TaskType: "authentication",
+			ApiKey:   config.Config("CREATIVEDREAM_WEBSOCKET_API_KEY"),
 		},
 	}
-
 	if err := conn.WriteJSON(authPayload); err != nil {
 		log.Printf("Authentication wrong: %v", err)
 	}
@@ -79,7 +101,7 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 
 	ticker := time.NewTicker(60 * time.Second)
 	defer ticker.Stop()
-	tickerPayload := []RequestPayload{
+	tickerPayload := []Ping{
 		{
 			TaskType: "ping",
 			Ping:     true,
@@ -89,42 +111,13 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 	for {
 		select {
 		case request := <-requestCh:
+
 			log.Printf("Processing generation request for TaskUUID: %s", request.TaskUUID)
 
-			// Create request payload
-			payload := []RequestPayload{
-				{
-					TaskType:      "imageInference",
-					TaskUUID:      request.TaskUUID,
-					OutputType:    "URL",
-					OutputFormat:  "JPG",
-					Width:         640,
-					Height:        1152,
-					CFGScale:      3.5,
-					NumberResults: 1,
-					IncludeCost:   true,
-					CheckNSFW:     true,
-				},
-			}
-			switch request.Model {
-			case "CreativeDream": // TODO
-			case "realism":
-				payload[0].ClipSkip = 0
-				payload[0].Scheduler = "Default"
-				payload[0].PositivePrompt = request.Prompt
-				payload[0].NegativePrompt = "score_6, score_5, score_4, text, censored, deformed, bad hand, watermark"
-				payload[0].Model = "civitai:372465@914390"
-				payload[0].Steps = 28
-			case "anime":
-				payload[0].ClipSkip = 2
-				payload[0].Scheduler = "DPM++ 2M"
-				payload[0].PositivePrompt = "score_9, score_8_up, score_7_up, score_6_up, score_5_up, score_4_up, source_anime, " + request.Prompt
-				payload[0].NegativePrompt = `3D, CGI, render, photo, text, watermark, low-quality, signature, moiré pattern, downsampling, aliasing,
-							distorted, blurry, glossy, blur, jpeg artifacts, compression artifacts, poorly drawn, low-resolution, bad, distortion,
-							twisted, excessive, exaggerated pose, exaggerated limbs, grainy, symmetrical, duplicate, error, pattern, beginner, pixelated,
-							fake, hyper, glitch, overexposed, high-contrast, bad-contrast`
-				payload[0].Model = "civitai:439889@828380"
-				payload[0].Steps = 25
+			model := newRequestImage(&request)
+
+			payload := []RequestImage{
+				model,
 			}
 
 			if err := conn.WriteJSON(payload); err != nil {
@@ -147,6 +140,7 @@ func listenWebsocket(conn *websocket.Conn, responseCh chan models.GeneratedImage
 		if err != nil {
 			log.Printf("Reading from the websocket: %v", err)
 		}
+		log.Printf("Received data #1: %s", message)
 
 		// Parse the response
 		var receivedPayload OutWebsocket
@@ -159,12 +153,8 @@ func listenWebsocket(conn *websocket.Conn, responseCh chan models.GeneratedImage
 		for _, data := range receivedPayload.Data {
 			switch data.TaskType {
 			case "ping":
-				log.Printf("Pong: %t", data.Pong)
 			case "authentication":
-				log.Printf("Authentication successful: %s", data.ConnectionSessionUUID)
 			case "imageInference":
-				log.Printf("Image generation completed - TaskUUID: %s, URL: %s", data.TaskUUID, data.ImageURL)
-
 				// Send the result to the response channel
 				generatedImage := models.GeneratedImage{
 					NSFW:     data.NSFWContent,
@@ -173,8 +163,9 @@ func listenWebsocket(conn *websocket.Conn, responseCh chan models.GeneratedImage
 					Done:     true,
 				}
 				responseCh <- generatedImage
+			default:
+				log.Println("Unknown Task Type: ", data.TaskType)
 			}
 		}
-
 	}
 }

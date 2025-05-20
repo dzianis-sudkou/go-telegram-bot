@@ -6,3 +6,4 @@
 # ignore directories
 bin
 old_database
+internal/websocket/models.go

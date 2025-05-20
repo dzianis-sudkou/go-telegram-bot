@@ -43,7 +43,7 @@ func Messages(bot *tgbotapi.BotAPI, update tgbotapi.Update, requestCh chan model
 			msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
 
 		case "generate":
-			msg = msgGenerate(bot, &update, &stateSlice, requestCh)
+			msg = msgGenerate(&update, &stateSlice, requestCh)
 		}
 	}
 
@@ -97,30 +97,24 @@ func msgSuccessfulPayment(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) 
 	return
 }
 
-func msgGenerate(bot *tgbotapi.BotAPI, update *tgbotapi.Update, stateSlice *[]string, requestCh chan models.GeneratedImage) (msg tgbotapi.MessageConfig) {
+func msgGenerate(update *tgbotapi.Update, stateSlice *[]string, requestCh chan models.GeneratedImage) (msg tgbotapi.MessageConfig) {
 	switch (*stateSlice)[1] {
 	case "menu":
-	case "1", "2", "3":
-
-		// Remove previous message
-		if _, err := bot.Request(tgbotapi.NewDeleteMessage(update.FromChat().ID, update.Message.MessageID-1)); err != nil {
-			log.Printf("Delete Message %d: %v", update.Message.MessageID, err)
-		}
-
+	case "anime", "realism", "creativedream":
+		services.SetUserState(update, "start")
 		switch (*stateSlice)[1] {
-		case "1":
-			services.AddNewGeneratedImage(update, "creativedream", requestCh)
+		case "anime":
+			services.AddNewGeneratedImage(update, "anime", requestCh)
 			services.ChangeBalance(-4, update)
-		case "2":
+		case "realism":
 			services.AddNewGeneratedImage(update, "realism", requestCh)
 			services.ChangeBalance(-2, update)
-		case "3":
-			services.AddNewGeneratedImage(update, "anime", requestCh)
+		case "creativedream":
+			services.AddNewGeneratedImage(update, "creativedream", requestCh)
 			services.ChangeBalance(-2, update)
 		}
 
 		msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "processing_generation"))
-
 	}
 	return
 }

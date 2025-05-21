@@ -16,6 +16,7 @@ type User struct {
 	State                string
 	Authorized           bool
 	FreeRequests         []FreeRequest
+	UsedPromos           []UsedPromo
 }
 
 // 2. Table posts in database
@@ -52,6 +53,8 @@ type GeneratedImage struct {
 	Done     bool
 	Chat     int64
 	Model    string
+	Format   string
+	Quality  string
 	Language string
 	NSFW     bool
 }
@@ -79,4 +82,19 @@ type Payment struct {
 	ShippingOptionID        string
 	TelegramPaymentChargeId string
 	ProviderPaymentChargeId string
+}
+
+// 9. Promocode table
+type Promo struct {
+	ID       uint   `gorm:"primaryKey"`
+	Code     string `gorm:"uniqueIndex"`
+	Amount   int
+	UseCount uint
+}
+
+// 10. Used Promos table
+type UsedPromo struct {
+	ID      uint `gorm:"primaryKey"`
+	UserID  uint `gorm:"uniqueIndex:idx_user_promo_code"`
+	PromoID uint `gorm:"uniqueIndex:idx_user_promo_code"`
 }

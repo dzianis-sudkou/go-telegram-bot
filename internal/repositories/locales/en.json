@@ -42,5 +42,8 @@
   "download_0": "<b>Download</b>\n\nTo Download my pictures in the best quality and without watermark, send me a number of publication.\n\nHow to knew a number you need:\n<b>1.</b> Open publication in my group - @gokuryo_art\n<b>2.</b> Copy the number from the description.",
   "download_1": "Send me another post number, or press the number below",
 
+  "used_promo": "<b>Промокод был успешно активирован 🥳</b>",
+  "wrong_promo": "<b>Wrong promo.\nOr it was already used.</b>",
+
   "wrong_message": "Something gone wrong 😕\nPlease, use menu buttons"
 }

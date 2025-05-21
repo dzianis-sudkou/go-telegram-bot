@@ -94,7 +94,7 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 	// Start listening goroutine
 	go listenWebsocket(&conn, &connSession, resumeConnection, responseCh)
 
-	ticker := time.NewTicker(60 * time.Second)
+	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
 	tickerPayload := []Ping{
 		{

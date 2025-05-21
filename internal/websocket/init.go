@@ -43,6 +43,12 @@ type Authentication struct {
 	ApiKey   string `json:"apiKey"`
 }
 
+type ResumeConnection struct {
+	TaskType              string `json:"taskType"`
+	ApiKey                string `json:"apiKey"`
+	ConnectionSessionUUID string `json:"connectionSessionUUID"`
+}
+
 type Ping struct {
 	TaskType string `json:"taskType"`
 	Ping     bool   `json:"ping"`
@@ -75,29 +81,18 @@ type OutWebsocket struct {
 
 func Init(requestCh chan models.GeneratedImage, responseCh chan models.GeneratedImage) {
 
-	// Establish the connection with websocket
-	conn, resp, err := websocket.DefaultDialer.Dial(config.Config("WEBSOCKET_API_URL"), nil)
-	if err != nil {
-		log.Printf("Websocket connection: %v", err)
-		return
-	}
+	var conn *websocket.Conn
+	var connSession string
 
-	log.Printf("Successfully connected to WebSocket: %s", resp.Status)
-	defer conn.Close() // Close connection when function exits
+	resumeConnection := make(chan struct{}, 1)
 
-	// Send Authentication message
-	authPayload := []Authentication{
-		{
-			TaskType: "authentication",
-			ApiKey:   config.Config("CREATIVEDREAM_WEBSOCKET_API_KEY"),
-		},
-	}
-	if err := conn.WriteJSON(authPayload); err != nil {
-		log.Printf("Authentication wrong: %v", err)
-	}
+	// Create new goroutine for the connection and authentication
+	go newConnection(&conn, &connSession, resumeConnection)
+
+	resumeConnection <- struct{}{}
 
 	// Start listening goroutine
-	go listenWebsocket(conn, responseCh)
+	go listenWebsocket(&conn, &connSession, resumeConnection, responseCh)
 
 	ticker := time.NewTicker(60 * time.Second)
 	defer ticker.Stop()
@@ -109,9 +104,17 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 	}
 
 	for {
+
+		currentLocalConn := conn
+
 		select {
+
 		case request := <-requestCh:
 
+			if currentLocalConn == nil {
+				time.Sleep(500 * time.Millisecond)
+				continue
+			}
 			log.Printf("Processing generation request for TaskUUID: %s", request.TaskUUID)
 
 			model := newRequestImage(&request)
@@ -132,14 +135,81 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 	}
 }
 
-func listenWebsocket(conn *websocket.Conn, responseCh chan models.GeneratedImage) {
+// This function will create new connection with websocket
+func newConnection(connPtr **websocket.Conn, connSessionPtr *string, resumeConnChan chan struct{}) {
+	apiUrl := config.Config("WEBSOCKET_API_URL")
+	apiKey := config.Config("CREATIVEDREAM_WEBSOCKET_API_KEY")
+
+	for {
+		<-resumeConnChan
+		log.Println("Establish new connection:")
+
+		if *connPtr != nil {
+			(*connPtr).Close()
+			*connPtr = nil
+		}
+
+		// Establish new connection
+		dialedConn, resp, err := websocket.DefaultDialer.Dial(apiUrl, nil)
+		if err != nil {
+			log.Printf("New connection dialing: %v", err)
+			*connPtr = nil
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		log.Printf("New connection dialing: %s", resp.Status)
+
+		*connPtr = dialedConn
+		var payload any
+
+		// Send Authentication message
+		if *connSessionPtr == "" {
+			payload = []Authentication{
+				{
+					TaskType: "authentication",
+					ApiKey:   apiKey,
+				},
+			}
+		} else {
+			payload = []ResumeConnection{
+				{
+					TaskType:              "authentication",
+					ApiKey:                apiKey,
+					ConnectionSessionUUID: *connSessionPtr,
+				},
+			}
+		}
+
+		if err := (*connPtr).WriteJSON(payload); err != nil {
+			log.Printf("Authentication wrong: %v", err)
+		}
+		log.Println("Successful active connection!")
+	}
+}
+
+func listenWebsocket(connPtr **websocket.Conn, connSessionPtr *string, resumeConn chan struct{}, responseCh chan models.GeneratedImage) {
+
 	log.Println("Websocket listener started")
 
 	for {
-		_, message, err := conn.ReadMessage()
+		currentLocalConn := *connPtr
+		if currentLocalConn == nil {
+			time.Sleep(500 * time.Millisecond)
+			continue
+		}
+		_, message, err := currentLocalConn.ReadMessage()
 		if err != nil {
 			log.Printf("Reading from the websocket: %v", err)
+			select {
+			case resumeConn <- struct{}{}:
+				log.Println("Sent resume signal.")
+			default:
+				log.Println("resumeConnChan full or new connection not ready")
+			}
+			time.Sleep(200 * time.Millisecond)
+			continue
 		}
+
 		log.Printf("Received data #1: %s", message)
 
 		// Parse the response
@@ -154,6 +224,10 @@ func listenWebsocket(conn *websocket.Conn, responseCh chan models.GeneratedImage
 			switch data.TaskType {
 			case "ping":
 			case "authentication":
+				if data.ConnectionSessionUUID != "" {
+					log.Printf("Authentication successful: %s", data.ConnectionSessionUUID)
+					*connSessionPtr = data.ConnectionSessionUUID
+				}
 			case "imageInference":
 				// Send the result to the response channel
 				generatedImage := models.GeneratedImage{

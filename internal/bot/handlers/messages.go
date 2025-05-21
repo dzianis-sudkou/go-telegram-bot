@@ -91,7 +91,7 @@ func msgNewRequest(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 func msgSuccessfulPayment(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 	services.SetUserState(update, "start")
 	services.AddNewPayment(update.Message.SuccessfulPayment)
-	services.ChangeBalance(update.Message.SuccessfulPayment.TotalAmount, update)
+	services.ChangeBalance(update.Message.SuccessfulPayment.TotalAmount*10/125, update)
 	msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "successful_payment"))
 	msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
 	return

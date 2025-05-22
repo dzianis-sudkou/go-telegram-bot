@@ -143,3 +143,23 @@ func AcceptRules(update *tgbotapi.Update) {
 		log.Printf("Update user: %v", err)
 	}
 }
+
+func UpdateLastMessage(tgId int64, lastMsg *tgbotapi.Message) {
+	user, err := repositories.GetUserByTgId(tgId)
+	if err != nil {
+		log.Printf("Get user: %v", err)
+	}
+	user.MsgCount += 1
+	user.BotMessageID = lastMsg.MessageID
+	if err := repositories.UpdateUser(&user); err != nil {
+		log.Printf("BotMessageID update: %v", err)
+	}
+}
+
+func GetBotLastMessage(tgId int64) int {
+	user, err := repositories.GetUserByTgId(tgId)
+	if err != nil {
+		log.Printf("Get user: %v", err)
+	}
+	return user.BotMessageID
+}

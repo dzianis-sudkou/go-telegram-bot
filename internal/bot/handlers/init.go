@@ -27,7 +27,6 @@ func Init(bot *tgbotapi.BotAPI, botDone *chan struct{}, requestCh chan models.Ge
 		select {
 		case update := <-updates:
 			if update.Message != nil {
-				services.UpdateMessageCount(&update)
 				if update.Message.IsCommand() {
 					Commands(bot, update)
 				} else {
@@ -64,11 +63,7 @@ func sendGeneratedImage(bot *tgbotapi.BotAPI, image models.GeneratedImage) {
 
 	img := services.UpdateGeneratedImage(&image)
 
-	// Remove the previous message
-	deleteMessage := tgbotapi.NewDeleteMessage(img.Chat, int(img.Message))
-	if _, err := bot.Request(deleteMessage); err != nil {
-		log.Printf("Delete Message: %v", err)
-	}
+	removeLastMessage(bot, img.Chat, int(img.Message))
 
 	// Check if image violates bot rules
 	if image.NSFW {
@@ -90,13 +85,23 @@ func sendGeneratedImage(bot *tgbotapi.BotAPI, image models.GeneratedImage) {
 	newMsg.ReplyMarkup = keyboards.KeyboardBackButton("generate_menu")
 	newMsg.ParseMode = "HTML"
 
-	if _, err := bot.Send(newMsg); err != nil {
+	lastMsg, err := bot.Send(newMsg)
+	if err != nil {
 		log.Printf("Send the Generate Menu Message: %v", err)
 	}
+	services.UpdateLastMessage(lastMsg.Chat.ID, &lastMsg)
 }
 
 func getStateSlice(state *string) (stateSlice []string) {
 	stateSlice = strings.Split(*state, "_")
 	log.Printf("Get state Slice: %+v     %s", stateSlice, *state)
 	return
+}
+
+// Remove the previous message
+func removeLastMessage(bot *tgbotapi.BotAPI, chatId int64, messageId int) {
+	deleteMessage := tgbotapi.NewDeleteMessage(chatId, messageId)
+	if _, err := bot.Request(deleteMessage); err != nil {
+		log.Printf("Delete Message: %v", err)
+	}
 }

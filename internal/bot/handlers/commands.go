@@ -47,10 +47,14 @@ func Commands(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
 	}
 
+	removeLastMessage(bot, update.FromChat().ID, services.GetBotLastMessage(update.SentFrom().ID))
+
 	msg.ParseMode = "HTML"
-	if _, err := bot.Send(msg); err != nil {
+	lastMsg, err := bot.Send(msg)
+	if err != nil {
 		log.Printf("Sending the message error: %v", err)
 	}
+	services.UpdateLastMessage(update.SentFrom().ID, &lastMsg)
 }
 
 func cmdStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) (msg tgbotapi.MessageConfig) {

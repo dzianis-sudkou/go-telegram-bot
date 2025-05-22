@@ -103,14 +103,14 @@ func msgGenerate(update *tgbotapi.Update, stateSlice *[]string, requestCh chan m
 		services.SetUserState(update, "start")
 		switch (*stateSlice)[1] {
 		case "anime":
-			services.AddNewGeneratedImage(update, "anime", requestCh)
-			services.ChangeBalance(-4, update)
+			services.AddNewGeneratedImage(update, "anime", (*stateSlice)[2], requestCh)
+			services.ChangeBalance(-2, update)
 		case "realism":
-			services.AddNewGeneratedImage(update, "realism", requestCh)
+			services.AddNewGeneratedImage(update, "realism", (*stateSlice)[2], requestCh)
 			services.ChangeBalance(-2, update)
 		case "creativedream":
-			services.AddNewGeneratedImage(update, "creativedream", requestCh)
-			services.ChangeBalance(-2, update)
+			services.AddNewGeneratedImage(update, "creativedream", (*stateSlice)[2], requestCh)
+			services.ChangeBalance(-4, update)
 		}
 		msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "processing_generation"))
 	}

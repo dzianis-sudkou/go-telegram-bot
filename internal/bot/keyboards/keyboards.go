@@ -1,6 +1,7 @@
 package keyboards
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/services"
@@ -121,19 +122,94 @@ func KeyboardGenerateMenu(locale string) (keyboard tgbotapi.InlineKeyboardMarkup
 
 	keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(buttons[0], "generate_anime"),
+			tgbotapi.NewInlineKeyboardButtonData(buttons[0], "generate_anime_square_HD"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(buttons[1], "generate_realism"),
+			tgbotapi.NewInlineKeyboardButtonData(buttons[1], "generate_realism_square_HD"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(buttons[2], "generate_creativedream"),
+			tgbotapi.NewInlineKeyboardButtonData(buttons[2], "generate_creativedream_square_HD"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(buttons[3], "payment_menu"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(buttons[4], "start"),
+		),
+	)
+	return
+}
+
+// generate_anime_square_HD
+func KeyboardChooseFormat(model string, format string, quality string) (keyboard tgbotapi.InlineKeyboardMarkup) {
+
+	formatInt := map[string]int{
+		"horizontal": 0,
+		"square":     1,
+		"vertical":   2,
+	}
+
+	qualityInt := map[string]int{
+		"HD": 0,
+		"2K": 1,
+		"4K": 2,
+	}
+
+	data := "generate_%s_%s_%s"
+
+	formatCallbackData := []string{
+		fmt.Sprintf(data, model, "horizontal", quality),
+		fmt.Sprintf(data, model, "square", quality),
+		fmt.Sprintf(data, model, "vertical", quality),
+	}
+
+	qualityCallbackData := []string{
+		fmt.Sprintf(data, model, format, "HD"),
+		fmt.Sprintf(data, model, format, "2K"),
+		fmt.Sprintf(data, model, format, "4K"),
+	}
+
+	formatButtons := []tgbotapi.InlineKeyboardButton{
+		{
+			Text:         "16 : 9",
+			CallbackData: &formatCallbackData[0],
+		},
+		{
+			Text:         "1 : 1",
+			CallbackData: &formatCallbackData[1],
+		},
+		{
+			Text:         "9 : 16",
+			CallbackData: &formatCallbackData[2],
+		},
+	}
+
+	qualityButtons := []tgbotapi.InlineKeyboardButton{
+		{
+			Text:         "HD",
+			CallbackData: &qualityCallbackData[0],
+		},
+		{
+			Text:         "2K",
+			CallbackData: &qualityCallbackData[1],
+		},
+		{
+			Text:         "4K",
+			CallbackData: &qualityCallbackData[2],
+		},
+	}
+
+	formatButtons[formatInt[format]].Text = "✅ " + formatButtons[formatInt[format]].Text
+	qualityButtons[qualityInt[quality]].Text = "✅ " + qualityButtons[qualityInt[quality]].Text
+	keyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			formatButtons...,
+		),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	qualityButtons...,
+		// ),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("↩️", "generate_menu"),
 		),
 	)
 	return

@@ -50,10 +50,14 @@ func Messages(bot *tgbotapi.BotAPI, update tgbotapi.Update, requestCh chan model
 		msg.ReplyMarkup = keyboards.KeyboardMainMenu(update.SentFrom().LanguageCode)
 	}
 
+	removeLastMessage(bot, update.FromChat().ID, services.GetBotLastMessage(update.SentFrom().ID))
+
 	msg.ParseMode = "HTML"
-	if _, err := bot.Send(msg); err != nil {
+	lastMsg, err := bot.Send(msg)
+	if err != nil {
 		log.Printf("Message sending error: %v", err)
 	}
+	services.UpdateLastMessage(update.SentFrom().ID, &lastMsg)
 }
 
 func msgNewPost(update *tgbotapi.Update, stateSlice *[]string) (msg tgbotapi.MessageConfig) {

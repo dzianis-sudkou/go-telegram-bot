@@ -7,6 +7,7 @@ type User struct {
 	ID                   uint `gorm:"primaryKey"`
 	ChatId               int64
 	TgId                 int64
+	BotMessageID         int
 	FullName             string
 	MsgCount             uint
 	FreeRequestCount     uint

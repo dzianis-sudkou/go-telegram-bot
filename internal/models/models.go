@@ -86,10 +86,11 @@ type Payment struct {
 
 // 9. Promocode table
 type Promo struct {
-	ID       uint   `gorm:"primaryKey"`
-	Code     string `gorm:"uniqueIndex"`
-	Amount   int
-	UseCount uint
+	ID          uint   `gorm:"primaryKey"`
+	Code        string `gorm:"uniqueIndex"`
+	Amount      int
+	UseCount    uint
+	Activations int
 }
 
 // 10. Used Promos table

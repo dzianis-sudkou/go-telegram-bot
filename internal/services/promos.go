@@ -8,11 +8,12 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func AddNewPromo(code string, amount int) {
+func AddNewPromo(code string, amount int, activations int) {
 	var newPromo = models.Promo{
-		Code:     code,
-		Amount:   amount,
-		UseCount: 0,
+		Code:        code,
+		Amount:      amount,
+		UseCount:    0,
+		Activations: activations,
 	}
 
 	err := repositories.CreatePromo(&newPromo)
@@ -25,6 +26,9 @@ func UsePromo(update *tgbotapi.Update, promo string) bool {
 	foundPromo, err := repositories.GetPromo(promo)
 	if err != nil {
 		return false // Promo not found
+	}
+	if int(foundPromo.UseCount)-foundPromo.Activations == 0 {
+		return false
 	}
 	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
 	if err != nil {

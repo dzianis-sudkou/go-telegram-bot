@@ -143,13 +143,14 @@ func cmdAddPromo(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 	// Check if the user is admin
 	if services.IsAdmin(update) {
 		data := strings.Split(update.Message.CommandArguments(), " ") // [code, amount]
-		if len(data) != 2 {
+		if len(data) != 3 {
 			msg = tgbotapi.NewMessage(update.FromChat().ID, "Wrong command")
 			return
 		}
 		code := data[0]
 		amount, _ := strconv.Atoi(data[1])
-		services.AddNewPromo(code, amount)
+		activations, _ := strconv.Atoi(data[2])
+		services.AddNewPromo(code, amount, activations)
 		msg = tgbotapi.NewMessage(update.FromChat().ID, "Successful command execution - "+update.Message.Command())
 	} else {
 		msg = tgbotapi.NewMessage(update.FromChat().ID, "I'm sorry, you don't have access to this command.")

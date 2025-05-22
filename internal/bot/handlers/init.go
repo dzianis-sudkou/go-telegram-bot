@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"log"
+	"strings"
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/bot/keyboards"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/models"
@@ -92,4 +93,10 @@ func sendGeneratedImage(bot *tgbotapi.BotAPI, image models.GeneratedImage) {
 	if _, err := bot.Send(newMsg); err != nil {
 		log.Printf("Send the Generate Menu Message: %v", err)
 	}
+}
+
+func getStateSlice(state *string) (stateSlice []string) {
+	stateSlice = strings.Split(*state, "_")
+	log.Printf("Get state Slice: %+v     %s", stateSlice, *state)
+	return
 }

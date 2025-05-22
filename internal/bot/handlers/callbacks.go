@@ -75,13 +75,15 @@ func callbackStart(bot *tgbotapi.BotAPI, update *tgbotapi.Update) (msg tgbotapi.
 }
 
 func callbackGenerate(update *tgbotapi.Update, callbackData *[]string) (msg tgbotapi.EditMessageTextConfig) {
-	state := (*callbackData)[0] + "_" + (*callbackData)[1]
+	state := update.CallbackData()
+	log.Printf("Inside callback Generate - %s", state)
+	stateSlice := getStateSlice(&state)
 
-	switch (*callbackData)[1] {
+	switch stateSlice[1] {
 
 	// Menu that prints all the information and let's user choose the model
 	case "menu", "acceptrules":
-		if (*callbackData)[1] == "acceptrules" {
+		if stateSlice[1] == "acceptrules" {
 			services.AcceptRules(update)
 		}
 		// Prints all the rules if the user hasn't accepted rules
@@ -111,15 +113,17 @@ func callbackGenerate(update *tgbotapi.Update, callbackData *[]string) (msg tgbo
 				keyboards.KeyboardGenerateMenu(update.SentFrom().LanguageCode),
 			)
 		}
-	case "anime", "realism":
 
+	case "anime", "realism": // generate_anime_square_HD
+		var keyboard tgbotapi.InlineKeyboardMarkup
+		keyboard = keyboards.KeyboardChooseFormat(stateSlice[1], stateSlice[2], stateSlice[3])
 		if services.IsEnoughCoins(2, update) {
 			services.SetUserState(update, state)
 			msg = tgbotapi.NewEditMessageTextAndMarkup(
 				update.FromChat().ID,
 				update.CallbackQuery.Message.MessageID,
 				services.GetTextLocale(update.SentFrom().LanguageCode, "generate_prompt"),
-				keyboards.KeyboardBackButton("generate_menu"),
+				keyboard,
 			)
 		} else {
 			msg = tgbotapi.NewEditMessageTextAndMarkup(

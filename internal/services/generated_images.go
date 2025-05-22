@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func AddNewGeneratedImage(update *tgbotapi.Update, model string, requestCh chan models.GeneratedImage) {
+func AddNewGeneratedImage(update *tgbotapi.Update, model string, format string, requestCh chan models.GeneratedImage) {
 
 	// Update user's number of generated images
 	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
@@ -28,6 +28,7 @@ func AddNewGeneratedImage(update *tgbotapi.Update, model string, requestCh chan 
 		Done:     false,
 		Chat:     update.FromChat().ID,
 		Model:    model,
+		Format:   format,
 		Language: update.SentFrom().LanguageCode,
 	}
 

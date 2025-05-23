@@ -61,27 +61,40 @@ func newUpdateConfig(bot *tgbotapi.BotAPI) (updateConfig tgbotapi.UpdateConfig) 
 
 func sendGeneratedImage(bot *tgbotapi.BotAPI, image models.GeneratedImage) {
 
-	img := services.UpdateGeneratedImage(&image)
-
-	removeLastMessage(bot, img.Chat, int(img.Message))
+	removeLastMessage(bot, image.Chat, int(image.Message))
 
 	// Check if image violates bot rules
 	if image.NSFW {
-		msg := tgbotapi.NewMessage(img.Chat, services.GetTextLocale(img.Language, "detected_nsfw"))
+		msg := tgbotapi.NewMessage(image.Chat, services.GetTextLocale(image.Language, "detected_nsfw"))
 		msg.ParseMode = "HTML"
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Send nsfw-error message: %v", err)
 		}
 	} else {
-		msg := tgbotapi.NewPhoto(img.Chat, tgbotapi.FileURL(img.ImageURL))
-		msg.Caption = services.GetTextLocale(img.Language, "completed_generation")
-		msg.ParseMode = "HTML"
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Send the file: %v", err)
+		file := tgbotapi.FileURL(image.ImageURL)
+		switch image.Quality {
+
+		// HD image
+		case "HD":
+			msg := tgbotapi.NewPhoto(image.Chat, file)
+			msg.Caption = services.GetTextLocale(image.Language, "completed_generation")
+			msg.ParseMode = "HTML"
+			if _, err := bot.Send(msg); err != nil {
+				log.Printf("Send the file: %v", err)
+			}
+
+		// 4K image
+		case "4K":
+			msg := tgbotapi.NewDocument(image.Chat, file)
+			msg.Caption = services.GetTextLocale(image.Language, "completed_generation")
+			msg.ParseMode = "HTML"
+			if _, err := bot.Send(msg); err != nil {
+				log.Printf("Send the file: %v", err)
+			}
 		}
 	}
 
-	newMsg := tgbotapi.NewMessage(img.Chat, services.GetTextLocale(img.Language, "after_completed_generation"))
+	newMsg := tgbotapi.NewMessage(image.Chat, services.GetTextLocale(image.Language, "after_completed_generation"))
 	newMsg.ReplyMarkup = keyboards.KeyboardBackButton("generate_menu")
 	newMsg.ParseMode = "HTML"
 

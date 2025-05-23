@@ -127,9 +127,9 @@ func KeyboardGenerateMenu(locale string) (keyboard tgbotapi.InlineKeyboardMarkup
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(buttons[1], "generate_realism_square_HD"),
 		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(buttons[2], "generate_creativedream_square_HD"),
-		),
+		// tgbotapi.NewInlineKeyboardRow(
+		// 	tgbotapi.NewInlineKeyboardButtonData(buttons[2], "generate_creativedream_square_HD"),
+		// ),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(buttons[3], "payment_menu"),
 		),
@@ -151,8 +151,7 @@ func KeyboardChooseFormat(model string, format string, quality string) (keyboard
 
 	qualityInt := map[string]int{
 		"HD": 0,
-		"2K": 1,
-		"4K": 2,
+		"4K": 1,
 	}
 
 	data := "generate_%s_%s_%s"
@@ -165,7 +164,6 @@ func KeyboardChooseFormat(model string, format string, quality string) (keyboard
 
 	qualityCallbackData := []string{
 		fmt.Sprintf(data, model, format, "HD"),
-		fmt.Sprintf(data, model, format, "2K"),
 		fmt.Sprintf(data, model, format, "4K"),
 	}
 
@@ -190,12 +188,8 @@ func KeyboardChooseFormat(model string, format string, quality string) (keyboard
 			CallbackData: &qualityCallbackData[0],
 		},
 		{
-			Text:         "2K",
-			CallbackData: &qualityCallbackData[1],
-		},
-		{
 			Text:         "4K",
-			CallbackData: &qualityCallbackData[2],
+			CallbackData: &qualityCallbackData[1],
 		},
 	}
 
@@ -205,9 +199,9 @@ func KeyboardChooseFormat(model string, format string, quality string) (keyboard
 		tgbotapi.NewInlineKeyboardRow(
 			formatButtons...,
 		),
-		// tgbotapi.NewInlineKeyboardRow(
-		// 	qualityButtons...,
-		// ),
+		tgbotapi.NewInlineKeyboardRow(
+			qualityButtons...,
+		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("↩️", "generate_menu"),
 		),

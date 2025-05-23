@@ -28,7 +28,7 @@ func Callbacks(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		msg = callbackStart(bot, &update)
 
 	case "generate":
-		msg = callbackGenerate(&update, &callbackData)
+		msg = callbackGenerate(&update)
 
 	case "request":
 		msg = callbackRequest(&update, &callbackData)
@@ -74,7 +74,7 @@ func callbackStart(bot *tgbotapi.BotAPI, update *tgbotapi.Update) (msg tgbotapi.
 	return
 }
 
-func callbackGenerate(update *tgbotapi.Update, callbackData *[]string) (msg tgbotapi.EditMessageTextConfig) {
+func callbackGenerate(update *tgbotapi.Update) (msg tgbotapi.EditMessageTextConfig) {
 	state := update.CallbackData()
 	log.Printf("Inside callback Generate - %s", state)
 	stateSlice := getStateSlice(&state)
@@ -101,10 +101,8 @@ func callbackGenerate(update *tgbotapi.Update, callbackData *[]string) (msg tgbo
 			services.SetUserState(update, state)
 			text := fmt.Sprintf(
 				services.GetTextLocale(update.SentFrom().LanguageCode, "generate_menu"),
-				user.FullName,
 				user.GeneratedImagesCount,
 				user.Credits,
-				uint(float64(user.Credits)*12.5),
 			)
 			msg = tgbotapi.NewEditMessageTextAndMarkup(
 				update.FromChat().ID,
@@ -117,12 +115,21 @@ func callbackGenerate(update *tgbotapi.Update, callbackData *[]string) (msg tgbo
 	case "anime", "realism": // generate_anime_square_HD
 		var keyboard tgbotapi.InlineKeyboardMarkup
 		keyboard = keyboards.KeyboardChooseFormat(stateSlice[1], stateSlice[2], stateSlice[3])
-		if services.IsEnoughCoins(2, update) {
+		if services.IsEnoughCoins(3, update) {
+			style := stateSlice[1]
+			var cost int
+			if stateSlice[3] == "HD" {
+				cost = 2
+			} else {
+				cost = 3
+			}
+			text := fmt.Sprintf(services.GetTextLocale(update.SentFrom().LanguageCode, "generate_prompt"), style, cost)
+
 			services.SetUserState(update, state)
 			msg = tgbotapi.NewEditMessageTextAndMarkup(
 				update.FromChat().ID,
 				update.CallbackQuery.Message.MessageID,
-				services.GetTextLocale(update.SentFrom().LanguageCode, "generate_prompt"),
+				text,
 				keyboard,
 			)
 		} else {

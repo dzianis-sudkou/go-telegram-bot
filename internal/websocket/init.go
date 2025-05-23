@@ -7,6 +7,7 @@ import (
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/config"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/models"
+	"github.com/dzianis-sudkou/go-telegram-bot/internal/services"
 	"github.com/gorilla/websocket"
 )
 
@@ -14,7 +15,9 @@ type RequestImage struct {
 	TaskType string `json:"taskType"`
 	TaskUUID string `json:"taskUUID"`
 
+	InputImage     string  `json:"inputImage"`
 	OutputType     string  `json:"outputType"`
+	UpscaleFactor  int     `json:"upscaleFactor"`
 	OutputFormat   string  `json:"outputFormat"`
 	OutputQuality  int     `json:"outputQuality"`
 	CheckNSFW      bool    `json:"checkNSFW"`
@@ -92,7 +95,7 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 	resumeConnection <- struct{}{}
 
 	// Start listening goroutine
-	go listenWebsocket(&conn, &connSession, resumeConnection, responseCh)
+	go listenWebsocket(&conn, &connSession, resumeConnection, requestCh)
 
 	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
@@ -109,6 +112,7 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 
 		select {
 
+		// Receive request from the channel
 		case request := <-requestCh:
 
 			if currentLocalConn == nil {
@@ -116,7 +120,21 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 			}
 			log.Printf("Processing generation request for TaskUUID: %s", request.TaskUUID)
 
-			model := newRequestImage(&request)
+			var model RequestImage
+
+			// Received request from the bot
+			if request.ImageURL == "" {
+				model = newRequestImage(&request)
+			} else if request.Quality == "HD" { // Received response with ready HD image
+				responseCh <- request
+				continue
+			} else if request.TaskType == "imageInference" { // Received 4k generated image. Need to upscale
+				request.TaskType = "imageUpscale"
+				model = newRequestImage(&request)
+			} else if request.TaskType == "imageUpscale" { // Received upscaled 4k image
+				responseCh <- request
+				continue
+			}
 
 			log.Printf("Received request model: \n%v", model)
 			payload := []RequestImage{
@@ -187,7 +205,7 @@ func newConnection(connPtr **websocket.Conn, connSessionPtr *string, resumeConnC
 	}
 }
 
-func listenWebsocket(connPtr **websocket.Conn, connSessionPtr *string, resumeConn chan struct{}, responseCh chan models.GeneratedImage) {
+func listenWebsocket(connPtr **websocket.Conn, connSessionPtr *string, resumeConn chan struct{}, requestCh chan models.GeneratedImage) {
 
 	log.Println("Websocket listener started")
 
@@ -222,21 +240,35 @@ func listenWebsocket(connPtr **websocket.Conn, connSessionPtr *string, resumeCon
 		// Process received payloads
 		for _, data := range receivedPayload.Data {
 			switch data.TaskType {
+
 			case "ping":
+
 			case "authentication":
 				if data.ConnectionSessionUUID != "" {
 					log.Printf("Authentication successful: %s", data.ConnectionSessionUUID)
 					*connSessionPtr = data.ConnectionSessionUUID
 				}
+
 			case "imageInference":
-				// Send the result to the response channel
+
+				// Send the result to the requestCh channel
 				generatedImage := models.GeneratedImage{
+					TaskType: "imageInference",
 					NSFW:     data.NSFWContent,
 					TaskUUID: data.TaskUUID,
 					ImageURL: data.ImageURL,
-					Done:     true,
 				}
-				responseCh <- generatedImage
+
+				requestCh <- services.UpdateGeneratedImage(&generatedImage)
+
+			case "imageUpscale":
+				generatedImage := models.GeneratedImage{
+					TaskType: "imageUpscale",
+					TaskUUID: data.TaskUUID,
+					ImageURL: data.ImageURL,
+				}
+				requestCh <- services.UpdateGeneratedImage(&generatedImage)
+
 			default:
 				log.Println("Unknown Task Type: ", data.TaskType)
 			}

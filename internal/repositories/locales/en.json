@@ -12,10 +12,10 @@
   "socials": "<b>🔗 Socials 🔗</b>",
   "support": "<b>💵 Support Channel 💵</b>",
 
-  "generate_menu": "<b>Generate Image: <i>Menu</i></b>\n\n<i>%s</i>\n\nGenerated images: %d 🎨\nBalance: %d 🪙 (⭐️ %d)\n",
+  "generate_menu": "<b>Generate Image: <i>Menu</i></b>\n\nGenerated images: %d 🎨\n\nBalance: %d 🪙\n",
   "generate_rules": "<b>Prompt Language:</b>\n All image generation requests must be submitted in the <i>English language</i> to ensure the model can best understand and process your input.\n\n<b>Content Restrictions:</b>\nYou are prohibited from generating images that:\n • Are <i>(NSFW)</i> 🔞\n • Are <i>illegal</i>, promote <i>illegal acts</i>, or depict <i>graphic violence</i> 🤕\n\n<b>Image Usage and Rights:</b>\n • Generated images can be <i>downloaded</i> and <i>used</i> by you <i>freely</i> for personal and commercial purposes <i>without any restrictions</i>\n\n<b>Model Limitations & Output Variability:</b>\n • The quality and accuracy of generated images can <i>vary</i>.\n • The model may not always perfectly interpret your requests. <i>Outputs can be unpredictable</i>.\n • The model does not possess consciousness or intent. Any resemblance to real persons is <i>coincidental</i>",
-  "generate_menu_buttons": "1️⃣ Anime Style (2 🪙)\n2️⃣ Realism Style (2 🪙)\n3️⃣ Creative Dream Style (4 🪙) 🚫\n🪙 Add Coins 🪙\n🏠 Main Menu 🏠",
-  "generate_prompt": "Send me the <i>description</i> of the image 📝.\nI'll <b>create</b> it for you 😉",
+  "generate_menu_buttons": "1️⃣ Anime style\n2️⃣ Realism style\n3️⃣ Creative Dream Style 🚫\n🪙 Add Coins 🪙\n🏠 Main Menu 🏠",
+  "generate_prompt": "<b>Image Generation: %s style</b> \n\n<b>Cost: %d 🪙</b>\n\nSend me the <i>description</i> of the image 📝.\nI'll <b>create</b> it for you 😉",
   "processing_generation": "⏳ <b>Processing generation</b> ⏳",
   "completed_generation": "🎨 <b>Image is Ready</b> 🎨",
   "after_completed_generation": "⬇️<b> Generate Menu </b>⬇️",

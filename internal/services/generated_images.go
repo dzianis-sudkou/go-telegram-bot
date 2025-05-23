@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func AddNewGeneratedImage(update *tgbotapi.Update, model string, format string, requestCh chan models.GeneratedImage) {
+func AddNewGeneratedImage(update *tgbotapi.Update, model string, format string, quality string, requestCh chan models.GeneratedImage) {
 
 	// Update user's number of generated images
 	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
@@ -22,6 +22,7 @@ func AddNewGeneratedImage(update *tgbotapi.Update, model string, format string, 
 	}
 
 	image := models.GeneratedImage{
+		TaskType: "imageInference",
 		Message:  int64(update.Message.MessageID) + 1,
 		Prompt:   update.Message.Text,
 		TaskUUID: uuid.NewString(),
@@ -29,6 +30,7 @@ func AddNewGeneratedImage(update *tgbotapi.Update, model string, format string, 
 		Chat:     update.FromChat().ID,
 		Model:    model,
 		Format:   format,
+		Quality:  quality,
 		Language: update.SentFrom().LanguageCode,
 	}
 
@@ -44,6 +46,7 @@ func UpdateGeneratedImage(image *models.GeneratedImage) (img models.GeneratedIma
 		log.Printf("Get generated image by UUID: %v", err)
 	}
 	{
+		img.TaskType = image.TaskType
 		img.Done = true
 		img.NSFW = image.NSFW
 		img.ImageURL = image.ImageURL

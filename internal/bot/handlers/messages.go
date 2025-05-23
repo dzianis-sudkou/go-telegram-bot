@@ -102,19 +102,23 @@ func msgSuccessfulPayment(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) 
 }
 
 func msgGenerate(update *tgbotapi.Update, stateSlice *[]string, requestCh chan models.GeneratedImage) (msg tgbotapi.MessageConfig) {
+	cost := -2
+	if (*stateSlice)[3] == "4K" {
+		cost -= 1
+	}
 	switch (*stateSlice)[1] {
 	case "anime", "realism", "creativedream":
 		services.SetUserState(update, "start")
 		switch (*stateSlice)[1] {
 		case "anime":
-			services.AddNewGeneratedImage(update, "anime", (*stateSlice)[2], requestCh)
-			services.ChangeBalance(-2, update)
+			services.AddNewGeneratedImage(update, "anime", (*stateSlice)[2], (*stateSlice)[3], requestCh)
+			services.ChangeBalance(cost, update)
 		case "realism":
-			services.AddNewGeneratedImage(update, "realism", (*stateSlice)[2], requestCh)
-			services.ChangeBalance(-2, update)
+			services.AddNewGeneratedImage(update, "realism", (*stateSlice)[2], (*stateSlice)[3], requestCh)
+			services.ChangeBalance(cost, update)
 		case "creativedream":
-			services.AddNewGeneratedImage(update, "creativedream", (*stateSlice)[2], requestCh)
-			services.ChangeBalance(-4, update)
+			services.AddNewGeneratedImage(update, "creativedream", (*stateSlice)[2], (*stateSlice)[3], requestCh)
+			services.ChangeBalance(cost, update)
 		}
 		msg = tgbotapi.NewMessage(update.FromChat().ID, services.GetTextLocale(update.SentFrom().LanguageCode, "processing_generation"))
 	}

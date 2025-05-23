@@ -47,6 +47,7 @@ type FreeRequest struct {
 // 5. Table generated_images in database
 type GeneratedImage struct {
 	ID       uint `gorm:"primaryKey"`
+	TaskType string
 	Message  int64
 	Prompt   string
 	TaskUUID string

@@ -3,6 +3,7 @@ package handlers
 import (
 	"log"
 	"strings"
+	"time"
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/bot/keyboards"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/models"
@@ -38,7 +39,7 @@ func Init(bot *tgbotapi.BotAPI, botDone *chan struct{}, requestCh chan models.Ge
 				handlePrecheckoutQuery(bot, &update)
 			}
 		case image := <-responseCh:
-			sendGeneratedImage(bot, image)
+			go sendGeneratedImage(bot, image)
 		case <-*botDone:
 			bot.StopReceivingUpdates()
 			return
@@ -60,6 +61,8 @@ func newUpdateConfig(bot *tgbotapi.BotAPI) (updateConfig tgbotapi.UpdateConfig) 
 }
 
 func sendGeneratedImage(bot *tgbotapi.BotAPI, image models.GeneratedImage) {
+
+	time.Sleep(200 * time.Millisecond)
 
 	removeLastMessage(bot, image.Chat, int(image.Message))
 

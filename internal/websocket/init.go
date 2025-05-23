@@ -118,7 +118,6 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 			if currentLocalConn == nil {
 				time.Sleep(500 * time.Millisecond)
 			}
-			log.Printf("Processing generation request for TaskUUID: %s", request.TaskUUID)
 
 			var model RequestImage
 
@@ -136,7 +135,9 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 				continue
 			}
 
-			log.Printf("Received request model: \n%v", model)
+			log.Printf("Processing generation request for TaskUUID: %s", request.TaskUUID)
+
+			// log.Printf("Received request model: \n%v", model)
 			payload := []RequestImage{
 				model,
 			}

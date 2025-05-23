@@ -102,6 +102,9 @@ func msgSuccessfulPayment(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) 
 }
 
 func msgGenerate(update *tgbotapi.Update, stateSlice *[]string, requestCh chan models.GeneratedImage) (msg tgbotapi.MessageConfig) {
+	if len(*stateSlice) != 4 {
+		return
+	}
 	cost := -2
 	if (*stateSlice)[3] == "4K" {
 		cost -= 1

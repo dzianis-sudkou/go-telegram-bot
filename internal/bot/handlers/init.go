@@ -110,7 +110,6 @@ func sendGeneratedImage(bot *tgbotapi.BotAPI, image models.GeneratedImage) {
 
 func getStateSlice(state *string) (stateSlice []string) {
 	stateSlice = strings.Split(*state, "_")
-	log.Printf("Get state Slice: %+v     %s", stateSlice, *state)
 	return
 }
 

@@ -19,7 +19,7 @@ func AddNewUser(update *tgbotapi.Update) {
 		FullName:             update.SentFrom().FirstName + update.SentFrom().LastName,
 		MsgCount:             0,
 		FreeRequestCount:     0,
-		Credits:              0,
+		Credits:              20,
 		GeneratedImagesCount: 0,
 		RegistrationDate:     time.Now(),
 		State:                "start",

@@ -59,13 +59,12 @@ func Commands(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 func cmdStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 
+	// Add new user to the database if not presented
+	services.AddNewUser(&update)
+
 	// Control if the user is subscribed to the channel
 	if services.IsSubscribed(bot, update.Message.From.ID) {
-
-		// Add new user to the database if not presented
-		services.AddNewUser(&update)
 		services.SetUserState(&update, "start")
-
 		// Getting the message reply from the locale database
 		text := fmt.Sprintf(services.GetTextLocale(update.Message.From.LanguageCode, "start"), update.SentFrom().FirstName+update.SentFrom().LastName)
 		msg = tgbotapi.NewMessage(update.Message.Chat.ID, text)

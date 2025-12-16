@@ -49,7 +49,7 @@ func KeyboardSupport() tgbotapi.InlineKeyboardMarkup {
 			tgbotapi.NewInlineKeyboardButtonURL("🟠 Boosty 🟠", "https://boosty.to/moskvinssss/donate"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonURL("Other...", "t.me/@gokuryo"),
+			tgbotapi.NewInlineKeyboardButtonURL("Other...", "https://t.me/gokuryo"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("↩️", "start"),
@@ -83,7 +83,7 @@ func KeyboardMainMenu(locale string) tgbotapi.InlineKeyboardMarkup {
 func KeyboardSubscribe() tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonURL("Creative Dream AI", "t.me/@gokuryo_art"),
+			tgbotapi.NewInlineKeyboardButtonURL("Creative Dream AI", "https://t.me/gokuryo_art"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("✅", "start"),
@@ -96,7 +96,7 @@ func KeyboardPaidPictureRequest() tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonURL("PayPal", "https://www.paypal.com/donate/?hosted_button_id=R5C8W4VRS9Y8C"),
-			tgbotapi.NewInlineKeyboardButtonURL("➡️", "t.me/@gokuryo"),
+			tgbotapi.NewInlineKeyboardButtonURL("➡️", "https://t.me/gokuryo"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("↩️", "request_0"),

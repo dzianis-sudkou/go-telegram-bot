@@ -18,11 +18,10 @@ func Run() {
 	/*
 		SETUP
 	*/
-
-	// Import env variables
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Read .env file error: %v", err)
+	if _, err := os.Stat(".env"); err == nil {
+		if err := godotenv.Load(); err != nil {
+			log.Fatalf("Reading .env file error: %v", err)
+		}
 	}
 
 	// Create channel for interrupt

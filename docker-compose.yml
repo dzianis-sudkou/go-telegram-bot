@@ -1,0 +1,16 @@
+services:
+  bot:
+    build: .
+    container_name: telegram-bot
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      # Override DB host to use container name
+      - DB_HOST=postgres-db
+    networks:
+      - shared-network
+
+networks:
+  shared-network:
+    external: true

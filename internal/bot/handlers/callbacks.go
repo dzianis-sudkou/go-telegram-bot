@@ -10,8 +10,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+// Callbacks Handler
 func Callbacks(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
-
 	// Send the answer to the telegram server
 	callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "")
 	if _, err := bot.Request(callback); err != nil {
@@ -181,7 +181,6 @@ func callbackPayment(bot *tgbotapi.BotAPI, update *tgbotapi.Update, callbackData
 }
 
 func createNewInvoice(bot *tgbotapi.BotAPI, update *tgbotapi.Update, amount int) {
-
 	prices := []tgbotapi.LabeledPrice{
 		{
 			Label:  fmt.Sprintf("Pay for %d stars", amount),
@@ -257,7 +256,6 @@ func callbackDownload(update *tgbotapi.Update, callbackData *[]string) (msg tgbo
 	text := services.GetTextLocale(update.CallbackQuery.From.LanguageCode, state)
 
 	switch (*callbackData)[1] {
-
 	// Menu for the download
 	case "0":
 		msg = tgbotapi.NewEditMessageTextAndMarkup(

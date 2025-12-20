@@ -6,6 +6,7 @@ import (
 
 // CREATE
 
+// CreateRequest Creates new request
 func CreateRequest(request *models.FreeRequest) (err error) {
 	err = DB.Create(request).Error
 	return

@@ -54,12 +54,11 @@ func CreateTables(db *gorm.DB) {
 }
 
 func GenerateLocales(db *gorm.DB) {
-
 	// Generate table with Locales [ru, en]
 	var languages []string = []string{"en", "ru"}
 
 	for _, language := range languages {
-		filePath := fmt.Sprintf("internal/repositories/locales/%s.json", language)
+		filePath := fmt.Sprintf("internal/repository/locales/%s.json", language)
 
 		jsonData, err := os.ReadFile(filePath)
 		if err != nil {

@@ -11,6 +11,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+// Messages Handles the user's message
 func Messages(bot *tgbotapi.BotAPI, update tgbotapi.Update, requestCh chan models.GeneratedImage) {
 	var msg tgbotapi.MessageConfig
 
@@ -73,7 +74,7 @@ func msgNewPost(update *tgbotapi.Update, stateSlice *[]string) (msg tgbotapi.Mes
 
 func msgNewDownload(bot *tgbotapi.BotAPI, update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 	var mediaGroupDocs []any
-	images := services.GetImagesByPostId(update, update.Message.Text)
+	images := services.GetImagesByPostID(update, update.Message.Text)
 	for _, image := range images {
 		mediaGroupDocs = append(mediaGroupDocs, tgbotapi.NewInputMediaDocument(tgbotapi.FileID(image.ImageHash)))
 	}
@@ -107,7 +108,7 @@ func msgGenerate(update *tgbotapi.Update, stateSlice *[]string, requestCh chan m
 	}
 	cost := -2
 	if (*stateSlice)[3] == "4K" {
-		cost -= 1
+		cost--
 	}
 	switch (*stateSlice)[1] {
 	case "anime", "realism", "creativedream":

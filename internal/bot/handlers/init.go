@@ -11,8 +11,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+// Init Starts the bot listening and handling the events.
 func Init(bot *tgbotapi.BotAPI, botDone *chan struct{}, requestCh chan models.GeneratedImage, responseCh chan models.GeneratedImage) {
-
 	// Drop updates
 	updateConfig := newUpdateConfig(bot)
 
@@ -61,7 +61,6 @@ func newUpdateConfig(bot *tgbotapi.BotAPI) (updateConfig tgbotapi.UpdateConfig) 
 }
 
 func sendGeneratedImage(bot *tgbotapi.BotAPI, image models.GeneratedImage) {
-
 	time.Sleep(200 * time.Millisecond)
 
 	removeLastMessage(bot, image.Chat, int(image.Message))
@@ -114,8 +113,8 @@ func getStateSlice(state *string) (stateSlice []string) {
 }
 
 // Remove the previous message
-func removeLastMessage(bot *tgbotapi.BotAPI, chatId int64, messageId int) {
-	deleteMessage := tgbotapi.NewDeleteMessage(chatId, messageId)
+func removeLastMessage(bot *tgbotapi.BotAPI, chatID int64, messageID int) {
+	deleteMessage := tgbotapi.NewDeleteMessage(chatID, messageID)
 	if _, err := bot.Request(deleteMessage); err != nil {
 		log.Printf("Delete Message: %v", err)
 	}

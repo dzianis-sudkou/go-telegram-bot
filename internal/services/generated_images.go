@@ -4,19 +4,19 @@ import (
 	"log"
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/models"
-	"github.com/dzianis-sudkou/go-telegram-bot/internal/repositories"
+	repositories "github.com/dzianis-sudkou/go-telegram-bot/internal/repository"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/google/uuid"
 )
 
+// AddNewGeneratedImage Adds new images to the database
 func AddNewGeneratedImage(update *tgbotapi.Update, model string, format string, quality string, requestCh chan models.GeneratedImage) {
-
 	// Update user's number of generated images
-	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	user, err := repositories.GetUserByTgID(update.SentFrom().ID)
 	if err != nil {
 		log.Printf("Get user by TG id: %v", err)
 	}
-	user.GeneratedImagesCount += 1
+	user.GeneratedImagesCount++
 	if err = repositories.UpdateUser(&user); err != nil {
 		log.Printf("Update user: %v", err)
 	}
@@ -40,6 +40,7 @@ func AddNewGeneratedImage(update *tgbotapi.Update, model string, format string, 
 	requestCh <- image
 }
 
+// UpdateGeneratedImage Updates the generated image info in database
 func UpdateGeneratedImage(image *models.GeneratedImage) (img models.GeneratedImage) {
 	img, err := repositories.GetGeneratedImageByUUID(image.TaskUUID)
 	if err != nil {

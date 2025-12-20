@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type RequestImage struct {
+type requestImage struct {
 	TaskType string `json:"taskType"`
 	TaskUUID string `json:"taskUUID"`
 
@@ -31,33 +31,33 @@ type RequestImage struct {
 	CFGScale       float64 `json:"CFGScale"`
 	ClipSkip       int     `json:"clipSkip"`
 	NumberResults  int     `json:"numberResults"`
-	Lora           []Lora  `json:"lora"`
+	Lora           []lora  `json:"lora"`
 	Width          int     `json:"width"`
 	Height         int     `json:"height"`
 }
 
-type Lora struct {
+type lora struct {
 	Model  string  `json:"model"`
 	Weight float64 `json:"weight"`
 }
 
-type Authentication struct {
+type authentication struct {
 	TaskType string `json:"taskType"`
-	ApiKey   string `json:"apiKey"`
+	APIKey   string `json:"apiKey"`
 }
 
-type ResumeConnection struct {
+type resumeConnection struct {
 	TaskType              string `json:"taskType"`
-	ApiKey                string `json:"apiKey"`
+	APIKey                string `json:"apiKey"`
 	ConnectionSessionUUID string `json:"connectionSessionUUID"`
 }
 
-type Ping struct {
+type ping struct {
 	TaskType string `json:"taskType"`
 	Ping     bool   `json:"ping"`
 }
 
-type ResponsePayload struct {
+type responsePayload struct {
 	TaskType string `json:"taskType"`
 
 	// Authentication
@@ -77,13 +77,13 @@ type ResponsePayload struct {
 	Cost            float64 `json:"cost"`
 }
 
-// The Response we receive from the server
-type OutWebsocket struct {
-	Data []ResponsePayload `json:"data"`
+// Out Response we receive from the server
+type outWebsocket struct {
+	Data []responsePayload `json:"data"`
 }
 
+// Init Setups the websocket connection and listen to it
 func Init(requestCh chan models.GeneratedImage, responseCh chan models.GeneratedImage) {
-
 	var conn *websocket.Conn
 	var connSession string
 
@@ -99,7 +99,7 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 
 	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
-	tickerPayload := []Ping{
+	tickerPayload := []ping{
 		{
 			TaskType: "ping",
 			Ping:     true,
@@ -119,26 +119,27 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 				time.Sleep(500 * time.Millisecond)
 			}
 
-			var model RequestImage
+			var model requestImage
 
 			// Received request from the bot
 			if request.ImageURL == "" {
-				model = newRequestImage(&request)
+				// model = newRequestImage(&request)
+				log.Println("Arrived Nothing...")
 			} else if request.Quality == "HD" { // Received response with ready HD image
 				responseCh <- request
 				continue
-			} else if request.TaskType == "imageInference" { // Received 4k generated image. Need to upscale
-				request.TaskType = "imageUpscale"
-				model = newRequestImage(&request)
-			} else if request.TaskType == "imageUpscale" { // Received upscaled 4k image
-				responseCh <- request
-				continue
+				// } else if request.TaskType == "imageInference" { // Received 4k generated image. Need to upscale
+				// 	request.TaskType = "imageUpscale"
+				// 	model = newRequestImage(&request)
+				// } else if request.TaskType == "imageUpscale" { // Received upscaled 4k image
+				// 	responseCh <- request
+				// 	continue
 			}
 
 			log.Printf("Processing generation request for TaskUUID: %s", request.TaskUUID)
 
 			// log.Printf("Received request model: \n%v", model)
-			payload := []RequestImage{
+			payload := []requestImage{
 				model,
 			}
 
@@ -156,7 +157,7 @@ func Init(requestCh chan models.GeneratedImage, responseCh chan models.Generated
 
 // This function will create new connection with websocket
 func newConnection(connPtr **websocket.Conn, connSessionPtr *string, resumeConnChan chan struct{}) {
-	apiUrl := config.Config("WEBSOCKET_API_URL")
+	apiURL := config.Config("WEBSOCKET_API_URL")
 	apiKey := config.Config("CREATIVEDREAM_WEBSOCKET_API_KEY")
 
 	for {
@@ -169,7 +170,7 @@ func newConnection(connPtr **websocket.Conn, connSessionPtr *string, resumeConnC
 		}
 
 		// Establish new connection
-		dialedConn, resp, err := websocket.DefaultDialer.Dial(apiUrl, nil)
+		dialedConn, resp, err := websocket.DefaultDialer.Dial(apiURL, nil)
 		if err != nil {
 			log.Printf("New connection dialing: %v", err)
 			*connPtr = nil
@@ -183,17 +184,17 @@ func newConnection(connPtr **websocket.Conn, connSessionPtr *string, resumeConnC
 
 		// Send Authentication message
 		if *connSessionPtr == "" {
-			payload = []Authentication{
+			payload = []authentication{
 				{
 					TaskType: "authentication",
-					ApiKey:   apiKey,
+					APIKey:   apiKey,
 				},
 			}
 		} else {
-			payload = []ResumeConnection{
+			payload = []resumeConnection{
 				{
 					TaskType:              "authentication",
-					ApiKey:                apiKey,
+					APIKey:                apiKey,
 					ConnectionSessionUUID: *connSessionPtr,
 				},
 			}
@@ -207,7 +208,6 @@ func newConnection(connPtr **websocket.Conn, connSessionPtr *string, resumeConnC
 }
 
 func listenWebsocket(connPtr **websocket.Conn, connSessionPtr *string, resumeConn chan struct{}, requestCh chan models.GeneratedImage) {
-
 	log.Println("Websocket listener started")
 
 	for {
@@ -232,7 +232,7 @@ func listenWebsocket(connPtr **websocket.Conn, connSessionPtr *string, resumeCon
 		log.Printf("Received data #1: %s", message)
 
 		// Parse the response
-		var receivedPayload OutWebsocket
+		var receivedPayload outWebsocket
 		if err = json.Unmarshal(message, &receivedPayload); err != nil {
 			log.Printf("Unmatching websocket response: %v", err)
 			continue
@@ -274,5 +274,32 @@ func listenWebsocket(connPtr **websocket.Conn, connSessionPtr *string, resumeCon
 				log.Println("Unknown Task Type: ", data.TaskType)
 			}
 		}
+	}
+}
+
+func newRequestImage(img *models.GeneratedImage) requestImage {
+	if img.TaskType == "imageUpscale" {
+		return requestImage{
+			TaskType:      "imageUpscale",
+			TaskUUID:      img.TaskUUID,
+			InputImage:    img.ImageURL,
+			OutputType:    "URL",
+			UpscaleFactor: 2,
+			OutputFormat:  "JPG",
+			OutputQuality: 95,
+		}
+	}
+
+	// Default: imageInference (text-to-image or img-to-img)
+	return requestImage{
+		TaskType:       "imageInference",
+		TaskUUID:       img.TaskUUID,
+		PositivePrompt: img.Prompt,
+		NumberResults:  1,
+		OutputType:     "URL",
+		OutputFormat:   "PNG",
+		OutputQuality:  95,
+		CheckNSFW:      true,
+		IncludeCost:    true,
 	}
 }

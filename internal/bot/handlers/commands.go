@@ -12,8 +12,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+// Commands User commands handler
 func Commands(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
-
 	var msg tgbotapi.MessageConfig
 
 	switch update.Message.Command() {
@@ -58,7 +58,6 @@ func Commands(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 }
 
 func cmdStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) (msg tgbotapi.MessageConfig) {
-
 	// Add new user to the database if not presented
 	services.AddNewUser(&update)
 
@@ -111,7 +110,6 @@ func cmdDownloadAllImages(bot *tgbotapi.BotAPI, update *tgbotapi.Update) {
 }
 
 func cmdAddCredits(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
-
 	// Check if the user is admin
 	if services.IsAdmin(update) {
 		data := strings.Split(update.Message.CommandArguments(), " ") // [tgId, credits]
@@ -119,9 +117,9 @@ func cmdAddCredits(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 			msg = tgbotapi.NewMessage(update.FromChat().ID, "Wrong command")
 			return
 		}
-		tgId, _ := strconv.ParseInt(data[0], 10, 64)
+		tgID, _ := strconv.ParseInt(data[0], 10, 64)
 		amount, _ := strconv.Atoi(data[1])
-		services.ChangeUserBalance(tgId, amount)
+		services.ChangeUserBalance(tgID, amount)
 		msg = tgbotapi.NewMessage(update.FromChat().ID, "Successful command execution - "+update.Message.Command())
 	} else {
 		msg = tgbotapi.NewMessage(update.FromChat().ID, "I'm sorry, you don't have access to this command.")
@@ -130,7 +128,6 @@ func cmdAddCredits(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 }
 
 func cmdAddPost(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
-
 	// Check if the user is admin
 	if services.IsAdmin(update) {
 		services.SetUserState(update, "newPost_"+update.Message.CommandArguments()) // Change his state
@@ -142,7 +139,6 @@ func cmdAddPost(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 }
 
 func cmdAddPromo(update *tgbotapi.Update) (msg tgbotapi.MessageConfig) {
-
 	// Check if the user is admin
 	if services.IsAdmin(update) {
 		data := strings.Split(update.Message.CommandArguments(), " ") // [code, amount]

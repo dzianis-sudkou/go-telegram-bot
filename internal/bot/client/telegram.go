@@ -7,6 +7,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+// Init the Telegram bot
 func Init(botDone *chan struct{}, requestCh chan models.GeneratedImage, responseCh chan models.GeneratedImage) {
 	bot, err := tgbotapi.NewBotAPI(config.Config("TG_API"))
 	if err != nil {

@@ -8,12 +8,13 @@ import (
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/config"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/models"
-	"github.com/dzianis-sudkou/go-telegram-bot/internal/repositories"
+	repositories "github.com/dzianis-sudkou/go-telegram-bot/internal/repository"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+// AddNewUser Adds new user to the db
 func AddNewUser(update *tgbotapi.Update) {
-	var newUser = models.User{
+	newUser := models.User{
 		ChatId:               update.FromChat().ID,
 		TgId:                 update.SentFrom().ID,
 		FullName:             update.SentFrom().FirstName + update.SentFrom().LastName,
@@ -35,8 +36,9 @@ func AddNewUser(update *tgbotapi.Update) {
 	}
 }
 
+// GetUserState Gets the user's state
 func GetUserState(update *tgbotapi.Update) string {
-	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	user, err := repositories.GetUserByTgID(update.SentFrom().ID)
 	if err != nil {
 		log.Printf("User not found: %v", err)
 		return ""
@@ -44,8 +46,9 @@ func GetUserState(update *tgbotapi.Update) string {
 	return user.State
 }
 
+// SetUserState Changes the user's state in the menu.
 func SetUserState(update *tgbotapi.Update, state string) {
-	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	user, err := repositories.GetUserByTgID(update.SentFrom().ID)
 	if err != nil {
 		log.Printf("User not found: %v", err)
 	}
@@ -56,13 +59,13 @@ func SetUserState(update *tgbotapi.Update, state string) {
 	}
 }
 
+// IsSubscribed Checks the user's subscription to the channel.
 func IsSubscribed(bot *tgbotapi.BotAPI, tgID int64) bool {
-
 	// Take the channel id from env
-	channelId, _ := strconv.ParseInt(config.Config("CHANNEL_ID"), 10, 64)
+	channelID, _ := strconv.ParseInt(config.Config("CHANNEL_ID"), 10, 64)
 	memberConfig := tgbotapi.GetChatMemberConfig{
 		ChatConfigWithUser: tgbotapi.ChatConfigWithUser{
-			ChatID: channelId,
+			ChatID: channelID,
 			UserID: tgID,
 		},
 	}
@@ -76,6 +79,7 @@ func IsSubscribed(bot *tgbotapi.BotAPI, tgID int64) bool {
 	return slices.Contains(roles, member.Status)
 }
 
+// IsAdmin Checks if the user is Admin
 func IsAdmin(update *tgbotapi.Update) bool {
 	adminList := []string{
 		config.Config("TG_GOKURYO_ID"),
@@ -84,16 +88,18 @@ func IsAdmin(update *tgbotapi.Update) bool {
 	return slices.Contains(adminList, strconv.Itoa(int(update.SentFrom().ID)))
 }
 
+// GetUser Retrieves the user from database
 func GetUser(update *tgbotapi.Update) (user models.User) {
-	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	user, err := repositories.GetUserByTgID(update.SentFrom().ID)
 	if err != nil {
 		log.Printf("User not found: %v", err)
 	}
 	return
 }
 
+// ChangeBalance Changes the user balance by the desired amount
 func ChangeBalance(amount int, update *tgbotapi.Update) {
-	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	user, err := repositories.GetUserByTgID(update.SentFrom().ID)
 	if err != nil {
 		log.Printf("User not found: %v", err)
 	}
@@ -103,8 +109,9 @@ func ChangeBalance(amount int, update *tgbotapi.Update) {
 	}
 }
 
-func ChangeUserBalance(tgId int64, amount int) {
-	user, err := repositories.GetUserByTgId(tgId)
+// ChangeUserBalance Changes the user balance
+func ChangeUserBalance(tgID int64, amount int) {
+	user, err := repositories.GetUserByTgID(tgID)
 	if err != nil {
 		log.Printf("User not found: %v", err)
 	}
@@ -114,27 +121,30 @@ func ChangeUserBalance(tgId int64, amount int) {
 	}
 }
 
+// IsEnoughCoins Checks if user has enough coins
 func IsEnoughCoins(amount int, update *tgbotapi.Update) bool {
-	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	user, err := repositories.GetUserByTgID(update.SentFrom().ID)
 	if err != nil {
 		log.Printf("User not found: %v", err)
 	}
 	return user.Credits >= amount
 }
 
+// UpdateMessageCount Updates user message count
 func UpdateMessageCount(update *tgbotapi.Update) {
-	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	user, err := repositories.GetUserByTgID(update.SentFrom().ID)
 	if err != nil {
 		log.Printf("User not found: %v", err)
 	}
-	user.MsgCount += 1
+	user.MsgCount++
 	if err = repositories.UpdateUser(&user); err != nil {
 		log.Printf("Update user: %v", err)
 	}
 }
 
+// AcceptRules Updates the user information after the rules accept
 func AcceptRules(update *tgbotapi.Update) {
-	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	user, err := repositories.GetUserByTgID(update.SentFrom().ID)
 	if err != nil {
 		log.Printf("User not found: %v", err)
 	}
@@ -144,20 +154,22 @@ func AcceptRules(update *tgbotapi.Update) {
 	}
 }
 
-func UpdateLastMessage(tgId int64, lastMsg *tgbotapi.Message) {
-	user, err := repositories.GetUserByTgId(tgId)
+// UpdateLastMessage Updates the count of user messages + the id of bot message
+func UpdateLastMessage(tgID int64, lastMsg *tgbotapi.Message) {
+	user, err := repositories.GetUserByTgID(tgID)
 	if err != nil {
 		log.Printf("Get user: %v", err)
 	}
-	user.MsgCount += 1
+	user.MsgCount++
 	user.BotMessageID = lastMsg.MessageID
 	if err := repositories.UpdateUser(&user); err != nil {
 		log.Printf("BotMessageID update: %v", err)
 	}
 }
 
-func GetBotLastMessage(tgId int64) int {
-	user, err := repositories.GetUserByTgId(tgId)
+// GetBotLastMessage Retrieves the id of the last bot message using the user ID
+func GetBotLastMessage(tgID int64) int {
+	user, err := repositories.GetUserByTgID(tgID)
 	if err != nil {
 		log.Printf("Get user: %v", err)
 	}

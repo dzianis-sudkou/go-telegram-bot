@@ -8,13 +8,13 @@ import (
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/bot/client"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/database/postgres"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/models"
-	"github.com/dzianis-sudkou/go-telegram-bot/internal/repositories"
+	repositories "github.com/dzianis-sudkou/go-telegram-bot/internal/repository"
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/websocket"
 	"github.com/joho/godotenv"
 )
 
+// Run Setup and runs an entire application
 func Run() {
-
 	/*
 		SETUP
 	*/

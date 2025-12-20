@@ -4,12 +4,13 @@ import (
 	"log"
 
 	"github.com/dzianis-sudkou/go-telegram-bot/internal/models"
-	"github.com/dzianis-sudkou/go-telegram-bot/internal/repositories"
+	repositories "github.com/dzianis-sudkou/go-telegram-bot/internal/repository"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+// AddNewPromo Function too add a new Promo
 func AddNewPromo(code string, amount int, activations int) {
-	var newPromo = models.Promo{
+	newPromo := models.Promo{
 		Code:        code,
 		Amount:      amount,
 		UseCount:    0,
@@ -22,6 +23,7 @@ func AddNewPromo(code string, amount int, activations int) {
 	}
 }
 
+// UsePromo Function to use the Promo Code
 func UsePromo(update *tgbotapi.Update, promo string) bool {
 	foundPromo, err := repositories.GetPromo(promo)
 	if err != nil {
@@ -30,7 +32,7 @@ func UsePromo(update *tgbotapi.Update, promo string) bool {
 	if int(foundPromo.UseCount)-foundPromo.Activations == 0 {
 		return false
 	}
-	user, err := repositories.GetUserByTgId(update.SentFrom().ID)
+	user, err := repositories.GetUserByTgID(update.SentFrom().ID)
 	if err != nil {
 		return false // User not found
 	}
@@ -43,7 +45,7 @@ func UsePromo(update *tgbotapi.Update, promo string) bool {
 		return false // It was already activated
 	}
 	ChangeBalance(foundPromo.Amount, update)
-	foundPromo.UseCount += 1
+	foundPromo.UseCount++
 	repositories.UpdatePromo(&foundPromo)
 	return true
 }

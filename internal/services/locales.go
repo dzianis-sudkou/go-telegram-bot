@@ -3,9 +3,10 @@ package services
 import (
 	"fmt"
 
-	"github.com/dzianis-sudkou/go-telegram-bot/internal/repositories"
+	repositories "github.com/dzianis-sudkou/go-telegram-bot/internal/repository"
 )
 
+// GetTextLocale Gets the string in the user's locale
 func GetTextLocale(locale string, state string) string {
 	var (
 		text string
